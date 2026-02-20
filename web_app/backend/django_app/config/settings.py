@@ -1,7 +1,9 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(Path(__file__).resolve().parent / ".env")
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-secret-key")
 DEBUG = os.getenv("DJANGO_DEBUG", "1") == "1"
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
@@ -46,11 +48,11 @@ ASGI_APPLICATION = "config.asgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("POSTGRES_DB", "app"),
-        "USER": os.getenv("POSTGRES_USER", "app"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "app"),
-        "HOST": os.getenv("POSTGRES_HOST", "postgres"),
-        "PORT": os.getenv("POSTGRES_PORT", "5432"),
+        "NAME": os.getenv("POSTGRES_DB") or os.getenv("DB_NAME", "app"),
+        "USER": os.getenv("POSTGRES_USER") or os.getenv("DB_USER", "app"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD") or os.getenv("DB_PASSWORD", "app"),
+        "HOST": os.getenv("POSTGRES_HOST") or os.getenv("DB_HOST", "postgres"),
+        "PORT": os.getenv("POSTGRES_PORT") or os.getenv("DB_PORT", "5432"),
     }
 }
 
