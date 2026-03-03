@@ -1,0 +1,91 @@
+.pageShell {
+  min-height: 100vh;
+  background: #0f0f0f;
+  display: flex;
+  flex-direction: column;
+}
+
+.formWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(48px, 6vw, 96px) 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: clamp(24px, 4vw, 40px);
+  width: min(1100px, 100%);
+}
+
+.heroPane {
+  border-radius: 24px;
+  padding: clamp(24px, 4vw, 40px);
+  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.04), transparent),
+    linear-gradient(135deg, #1e1e1e, #121212);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: 0 26px 52px rgba(0, 0, 0, 0.45);
+}
+
+.heroPane h1 {
+  margin: 0;
+  font-size: clamp(32px, 4vw, 44px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.heroPane p {
+  margin: 0;
+  color: #c7c7c7;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+.heroStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 12px;
+}
+
+.statCard {
+  flex: 1 1 140px;
+  min-width: 140px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.statValue {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffbe3c;
+}
+
+.statLabel {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #c7c7c7;
+}
+
+@media (max-width: 768px) {
+  .formWrap {
+    padding: 48px 18px;
+  }
+
+  .grid {
+    gap: 18px;
+  }
+
+  .heroPane {
+    padding: 24px;
+  }
+}

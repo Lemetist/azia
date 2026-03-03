@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import styles from "./page.module.css";
 
 const heroImage =
@@ -17,7 +14,6 @@ const iconAnywhere =
   "https://www.figma.com/api/mcp/asset/6af52e33-953c-43c1-8316-88fee2122b53";
 const iconProgress =
   "https://www.figma.com/api/mcp/asset/926d105d-5cb8-434d-99c5-e91bee87863a";
-const googleLogo = "https://www.svgrepo.com/show/475656/google-color.svg";
 const footerBg =
   "https://www.figma.com/api/mcp/asset/a187d1e4-d33d-4b88-92a0-021d594c1790";
 
@@ -69,9 +65,35 @@ const reasons = [
   },
 ];
 
-export default function HomePage() {
-  const [authTab, setAuthTab] = useState<"login" | "register">("login");
+const ctaCards: Array<{
+  title: string;
+  description: string;
+  benefits: string[];
+  action: string;
+  href: string;
+  tone: "ghost" | "primary";
+}> = [
+  {
+    title: "Уже тренируетесь с нами?",
+    description:
+      "Авторизуйтесь, чтобы продолжить работу с тренером, следить за прогрессом и получать новые задания.",
+    benefits: ["Синхронизация плана тренировок", "Уведомления от тренера"],
+    action: "Войти",
+    href: "/auth/login",
+    tone: "ghost",
+  },
+  {
+    title: "Впервые в FIT CENTER?",
+    description:
+      "Создайте аккаунт, заполните анкету и получите персональный план с учетом вашего уровня и целей.",
+    benefits: ["Стартовая диагностика", "Доступ к расписанию и тарифам"],
+    action: "Создать аккаунт",
+    href: "/auth/register",
+    tone: "primary",
+  },
+];
 
+export default function HomePage() {
   return (
     <main className={styles.page}>
       <header className={styles.nav}>
@@ -86,15 +108,15 @@ export default function HomePage() {
                 <a href="#coaches">Тренеры</a>
               </li>
               <li>
-                <a href="#auth">Записаться</a>
+                <a href="#cta">Записаться</a>
               </li>
             </ul>
           </nav>
           <div className={styles.navActions}>
-            <a className={styles.navGhost} href="#auth">
+            <a className={styles.navGhost} href="/auth/login">
               Войти
             </a>
-            <a className={styles.navPrimary} href="#auth">
+            <a className={styles.navPrimary} href="/auth/register">
               Начать
             </a>
           </div>
@@ -196,91 +218,46 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className={styles.auth} id="auth">
-        <div className={`${styles.sectionInner} ${styles.authInner}`}>
-          <div className={styles.authCard}>
-            <div
-              className={styles.authTabs}
-              role="tablist"
-              aria-label="Переключение форм"
-            >
-              <button
-                className={[
-                  styles.authTab,
-                  authTab === "login" ? styles.active : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                type="button"
-                role="tab"
-                aria-selected={authTab === "login"}
-                onClick={() => setAuthTab("login")}
-              >
-                Войти
-              </button>
-              <button
-                className={[
-                  styles.authTab,
-                  authTab === "register" ? styles.active : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                type="button"
-                role="tab"
-                aria-selected={authTab === "register"}
-                onClick={() => setAuthTab("register")}
-              >
-                Регистрация
-              </button>
-            </div>
-
-            <form className={styles.authForm}>
-              {authTab === "register" && (
-                <label className={styles.authField}>
-                  <span className={styles.authLabel}>Имя и фамилия</span>
-                  <span className={styles.inputShell}>
-                    <span className={styles.inputIcon}>👤</span>
-                    <input name="fullName" type="text" placeholder="Ваше имя" />
-                  </span>
-                </label>
-              )}
-              <label className={styles.authField}>
-                <span className={styles.authLabel}>Email</span>
-                <span className={styles.inputShell}>
-                  <span className={styles.inputIcon}>✉️</span>
-                  <input
-                    name="email"
-                    type="email"
-                    placeholder="example@mail.com"
-                  />
-                </span>
-              </label>
-              <label className={styles.authField}>
-                <span className={styles.authLabel}>Пароль</span>
-                <span className={styles.inputShell}>
-                  <span className={styles.inputIcon}>🔒</span>
-                  <input
-                    name="password"
-                    type="password"
-                    placeholder="Минимум 8 символов"
-                  />
-                </span>
-              </label>
-              <button className={styles.ctaPrimary} type="button">
-                {authTab === "login" ? "Войти" : "Создать аккаунт"}
-              </button>
-            </form>
-
-            <div className={styles.divider} aria-hidden="true">
-              <span>или</span>
-            </div>
-            <button className={styles.ctaGoogle} type="button">
-              <span className={styles.googleMark}>
-                <img src={googleLogo} alt="Google" />
-              </span>
-              Продолжить с Google
-            </button>
-          </div>
+      <section className={styles.auth} id="cta">
+        <div
+          className={`${styles.sectionInner} ${styles.authInner}`}
+          style={{ gap: "24px", flexWrap: "wrap" }}
+        >
+          {ctaCards.map((card) => {
+            const buttonClass =
+              card.tone === "ghost" ? styles.navGhost : styles.navPrimary;
+            return (
+              <article className={styles.authCard} key={card.title}>
+                <h3>{card.title}</h3>
+                <p>{card.description}</p>
+                <ul
+                  style={{
+                    marginTop: "18px",
+                    marginBottom: "24px",
+                    paddingLeft: "20px",
+                    color: "#dcdcdc",
+                    lineHeight: 1.6,
+                    fontSize: "14px",
+                  }}
+                >
+                  {card.benefits.map((benefit) => (
+                    <li key={benefit}>{benefit}</li>
+                  ))}
+                </ul>
+                <div
+                  className={styles.navActions}
+                  style={{ justifyContent: "flex-start" }}
+                >
+                  <a className={buttonClass} href={card.href}>
+                    {card.action}
+                  </a>
+                  <a className={styles.navGhost} href="#coaches">
+                    Посмотреть тренеров
+                  </a>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </section>
 
@@ -291,7 +268,7 @@ export default function HomePage() {
         </div>
         <div className={styles.footerContent}>
           <p>Готовы выйти на новый уровень?</p>
-          <h3>Присоединения уже сейчас</h3>
+          <h3>Присоединяйтесь уже сейчас</h3>
           <div className={styles.footerNote}>Ежедневно с 7:00 до 23:00</div>
         </div>
       </footer>

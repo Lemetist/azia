@@ -1,0 +1,15 @@
+{
+  "venvPath": "backend/django_app",
+  "venv": ".venv",
+  "executionEnvironments": [
+    {
+      "root": "backend/django_app",
+      "extraPaths": [
+        "backend/django_app",
+        "backend"
+      ]
+    }
+  ],
+  "typeCheckingMode": "basic",
+  "pythonVersion": "3.11"
+}
