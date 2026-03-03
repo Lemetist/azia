@@ -13,4 +13,6 @@ dependencies = [
     "sqlalchemy==2.0.36",
     "djangorestframework>=3.16.1",
     "djangorestframework-simplejwt>=5.5.1",
+    "python-dotenv>=1.0.1",
+    "drf-spectacular>=0.29.0",
 ]
