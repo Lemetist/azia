@@ -84,6 +84,18 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "My API",
     "DESCRIPTION": "API documentation",
     "VERSION": "1.0.0",
+    # Include bearer auth scheme and set it as a global security requirement
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SECURITY": [{"bearerAuth": []}],
+    "COMPONENTS": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+            }
+        }
+    },
 }
 
 SIMPLE_JWT = {
