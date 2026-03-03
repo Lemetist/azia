@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.contrib.auth.models import User
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -19,8 +20,6 @@ def register(request):
 	if not username or not password:
 		return Response({"detail": "username and password required"}, status=status.HTTP_400_BAD_REQUEST)
 
-	from django.contrib.auth.models import User
-
 	if User.objects.filter(username=username).exists():
 		return Response({"detail": "user already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -32,5 +31,3 @@ def register(request):
 @permission_classes([IsAuthenticated])
 def me(request):
 	return Response({"username": request.user.username})
-
-

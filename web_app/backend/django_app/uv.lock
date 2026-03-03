@@ -458,7 +458,6 @@ dependencies = [
     { name = "djangorestframework-simplejwt" },
     { name = "fastapi" },
     { name = "psycopg" },
-    { name = "python-dotenv" },
     { name = "sqlalchemy" },
     { name = "uvicorn", extra = ["standard"] },
 ]
@@ -471,7 +470,6 @@ requires-dist = [
     { name = "djangorestframework-simplejwt", specifier = ">=5.5.1" },
     { name = "fastapi", specifier = "==0.115.6" },
     { name = "psycopg", specifier = "==3.2.12" },
-    { name = "python-dotenv", specifier = "==1.0.1" },
     { name = "sqlalchemy", specifier = "==2.0.36" },
     { name = "uvicorn", extras = ["standard"], specifier = "==0.32.1" },
 ]
