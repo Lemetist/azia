@@ -1,4 +1,4 @@
-import AuthCard, { Credentials } from "../../../components/auth/AuthCard";
+import AuthCard from "../../../components/auth/AuthCard";
 import styles from "../auth.module.css";
 
 export const metadata = {
@@ -8,10 +8,6 @@ export const metadata = {
 };
 
 export default function RegisterPage() {
-  const handleRegister = async (credentials: Credentials) => {
-    console.log("Register credentials", credentials);
-  };
-
   return (
     <main className={styles.pageShell}>
       <section className={styles.formWrap}>
@@ -44,7 +40,6 @@ export default function RegisterPage() {
             title="Создать аккаунт FIT CENTER"
             subtitle="Заполните анкету и получите стартовую консультацию."
             defaultMode="register"
-            onRegister={handleRegister}
           />
         </div>
       </section>

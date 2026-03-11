@@ -1,4 +1,4 @@
-import AuthCard, { Credentials } from "../../../components/auth/AuthCard";
+import AuthCard from "../../../components/auth/AuthCard";
 import styles from "../auth.module.css";
 
 export const metadata = {
@@ -8,10 +8,6 @@ export const metadata = {
 };
 
 export default function LoginPage() {
-  const handleLogin = async (credentials: Credentials) => {
-    console.log("Login credentials", credentials);
-  };
-
   return (
     <main className={styles.pageShell}>
       <section className={styles.formWrap}>
@@ -46,7 +42,6 @@ export default function LoginPage() {
             title="Войти в FIT CENTER"
             subtitle="Следите за планом, получайте задания и держите связь с тренером."
             defaultMode="login"
-            onLogin={handleLogin}
           />
         </div>
       </section>

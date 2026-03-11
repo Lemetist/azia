@@ -1,276 +1,286 @@
-import styles from "./page.module.css";
+import Link from 'next/link';
 
-const heroImage =
-  "https://www.figma.com/api/mcp/asset/bfafd760-8aa9-44c6-acff-afd08a00c360";
-const featureImgTall =
-  "https://www.figma.com/api/mcp/asset/7c2e4795-0557-46d0-92b7-9172ef487f7e";
-const featureImgWideTop =
-  "https://www.figma.com/api/mcp/asset/a88d7b51-52b0-44be-b8e1-4e890346b6f4";
-const featureImgWideBottom =
-  "https://www.figma.com/api/mcp/asset/5403ade4-773f-4a34-a814-3ee6db1ab371";
-const iconStart =
-  "https://www.figma.com/api/mcp/asset/dbc81489-6c7b-4ec1-abcd-53898428c82a";
-const iconAnywhere =
-  "https://www.figma.com/api/mcp/asset/6af52e33-953c-43c1-8316-88fee2122b53";
-const iconProgress =
-  "https://www.figma.com/api/mcp/asset/926d105d-5cb8-434d-99c5-e91bee87863a";
-const footerBg =
-  "https://www.figma.com/api/mcp/asset/a187d1e4-d33d-4b88-92a0-021d594c1790";
+import styles from './page.module.css';
 
-const coachTiles = [
+const heroBackground =
+  'https://www.figma.com/api/mcp/asset/cc575220-a357-4221-98b5-d29f24860867';
+
+const navigationLinks = [
+  { label: 'Главная', href: '#home' },
+  { label: 'Программы', href: '#programs' },
+  { label: 'Формат', href: '#format' },
+  { label: 'Контакты', href: '#contacts' },
+];
+
+const heroStats = [
+  { value: '12+', label: 'авторских программ' },
+  { value: '5', label: 'профильных направлений' },
+  { value: '98%', label: 'удержания дисциплины' },
+];
+
+const programCards = [
   {
-    src: "https://www.figma.com/api/mcp/asset/7ce8c9ef-d24f-4da0-8a62-5d186d07a98a",
-    alt: "Футбольный мяч на поле",
+    title: 'Strength Base',
+    level: 'для силы',
+    description:
+      'Системная прогрессия, техника базовых движений и силовой цикл под конкретную цель.',
   },
   {
-    src: "https://www.figma.com/api/mcp/asset/a742363d-addd-463c-8f27-21621554288c",
-    alt: "Пловец в бассейне",
+    title: 'Combat Engine',
+    level: 'для выносливости',
+    description:
+      'Функциональные круги, интервальные блоки и работа в темпе, который держит вас в форме.',
   },
   {
-    src: "https://www.figma.com/api/mcp/asset/8a821eb7-63bb-478f-8f8b-e35673d0db69",
-    alt: "Бегун в тумане",
-  },
-  {
-    src: "https://www.figma.com/api/mcp/asset/06de155d-81de-4983-bd00-50041dd2b8f9",
-    alt: "Работа на тренажере",
-  },
-  {
-    src: "https://www.figma.com/api/mcp/asset/1204e420-2cdb-44c9-b751-04b6904774af",
-    alt: "Борьба на татами",
-  },
-  {
-    src: "https://www.figma.com/api/mcp/asset/29d63f3b-6a3c-4409-8205-3f6bdbca2d12",
-    alt: "Тренер в зале",
+    title: 'Athlete Reset',
+    level: 'для восстановления',
+    description:
+      'Мобильность, контроль нагрузки и возвращение в режим без перегруза и хаоса.',
   },
 ];
 
-const reasons = [
+const principles = [
+  'Тренировки строятся вокруг режима, а не вокруг мотивационных всплесков.',
+  'Каждая неделя имеет измеримую цель и понятную нагрузку.',
+  'Тренер, чат и трекер прогресса работают как одна система.',
+];
+
+const formatCards = [
   {
-    icon: iconStart,
-    title: "Программа для любого уровня",
-    description:
-      "Индивидуальный план с учетом ваших целей и стартовых показателей.",
+    title: 'Стартовая диагностика',
+    text: 'Фиксируем цели, ограничения, историю тренировок и текущую точку формы.',
   },
   {
-    icon: iconAnywhere,
-    title: "Тренируйтесь где удобно",
-    description:
-      "Стадион, зал или дом — подстраиваемся под ваш график и локацию.",
+    title: 'План на 6 недель',
+    text: 'Вы получаете структуру по нагрузке, восстановлению, контролю и питанию.',
   },
   {
-    icon: iconProgress,
-    title: "Видимый прогресс",
-    description:
-      "Регулярные замеры и сопровождение тренером, чтобы держать фокус.",
+    title: 'Еженедельная корректировка',
+    text: 'Программа обновляется по факту вашего прогресса, а не по шаблону.',
   },
 ];
 
-const ctaCards: Array<{
-  title: string;
-  description: string;
-  benefits: string[];
-  action: string;
-  href: string;
-  tone: "ghost" | "primary";
-}> = [
-  {
-    title: "Уже тренируетесь с нами?",
-    description:
-      "Авторизуйтесь, чтобы продолжить работу с тренером, следить за прогрессом и получать новые задания.",
-    benefits: ["Синхронизация плана тренировок", "Уведомления от тренера"],
-    action: "Войти",
-    href: "/auth/login",
-    tone: "ghost",
-  },
-  {
-    title: "Впервые в FIT CENTER?",
-    description:
-      "Создайте аккаунт, заполните анкету и получите персональный план с учетом вашего уровня и целей.",
-    benefits: ["Стартовая диагностика", "Доступ к расписанию и тарифам"],
-    action: "Создать аккаунт",
-    href: "/auth/register",
-    tone: "primary",
-  },
+const metrics = [
+  { value: '24/7', label: 'связь с наставником' },
+  { value: '150+', label: 'спортсменов в системе' },
+  { value: '360°', label: 'контроль нагрузки и сна' },
+  { value: '2026', label: 'новый сезон открыт' },
 ];
 
 export default function HomePage() {
   return (
-    <main className={styles.page}>
-      <header className={styles.nav}>
-        <div className={styles.navInner}>
-          <div className={styles.navBrand}>FIT CENTER</div>
-          <nav className={styles.navMenu} aria-label="Основная навигация">
-            <ul className={styles.navLinks}>
-              <li>
-                <a href="#why">Почему мы</a>
-              </li>
-              <li>
-                <a href="#coaches">Тренеры</a>
-              </li>
-              <li>
-                <a href="#cta">Записаться</a>
-              </li>
-            </ul>
+    <main className={styles.page} id="home">
+      <section className={styles.hero}>
+        <div
+          className={styles.heroImage}
+          style={{ backgroundImage: `url(${heroBackground})` }}
+          aria-hidden="true"
+        />
+        <div className={styles.heroMask} aria-hidden="true" />
+
+        <header className={styles.nav}>
+          <button className={styles.search} type="button" aria-label="Поиск">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M11 4.5a6.5 6.5 0 1 0 0 13a6.5 6.5 0 0 0 0-13Zm0-2a8.5 8.5 0 1 1-5.33 15.12l-3.14 3.14a1 1 0 1 1-1.41-1.41l3.14-3.14A8.5 8.5 0 0 1 11 2.5Z"
+                fill="currentColor"
+              />
+            </svg>
+          </button>
+
+          <nav className={styles.navMenu} aria-label="Основное меню">
+            {navigationLinks.map((item, index) => {
+              const isActive = index === 0;
+
+              return (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className={`${styles.navLink} ${isActive ? styles.activeLink : ''}`.trim()}
+                >
+                  <span>{item.label}</span>
+                  {isActive ? <span className={styles.activeLine} aria-hidden="true" /> : null}
+                </a>
+              );
+            })}
           </nav>
-          <div className={styles.navActions}>
-            <a className={styles.navGhost} href="/auth/login">
-              Войти
-            </a>
-            <a className={styles.navPrimary} href="/auth/register">
-              Начать
-            </a>
+
+          <div className={styles.authActions}>
+            <Link className={styles.loginButton} href="/auth/login">
+              Вход
+            </Link>
+            <Link className={styles.registerButton} href="/auth/register">
+              Регистрация
+            </Link>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <section className={styles.hero} id="hero">
-        <img className={styles.heroImage} src={heroImage} alt="Спортзал" />
-        <div className={styles.heroOverlay} aria-hidden="true" />
-        <h1 className={styles.heroHeadline}>HARD WORK PAYS.</h1>
-      </section>
-
-      <section className={styles.section} id="why">
-        <div className={styles.sectionInner}>
-          <div className={styles.sectionHeader}>
-            <h2>Почему выбирают нас</h2>
-            <p>
-              Команда тренеров, гибкие форматы и современный инвентарь — все для
-              того, чтобы вы достигли цели.
+        <div className={styles.heroContent}>
+          <div className={styles.heroCopy}>
+            <p className={styles.heroEyebrow}>primal training system</p>
+            <h1 className={styles.heroHeadline}>HARD WORK PAYS.</h1>
+            <p className={styles.heroLead}>
+              Не просто тренировки, а режим, в котором сила, выносливость и дисциплина
+              становятся системой. FIT CENTER соединяет нагрузку, аналитику и сопровождение
+              в один рабочий цикл.
             </p>
-          </div>
-          <div className={styles.whyGrid}>
-            <div className={styles.reasonList}>
-              {reasons.map((reason) => (
-                <article className={styles.reason} key={reason.title}>
-                  <div className={styles.iconWrap}>
-                    <img
-                      className={styles.icon}
-                      src={reason.icon}
-                      alt=""
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div>
-                    <h3>{reason.title}</h3>
-                    <p>{reason.description}</p>
-                  </div>
+
+            <div className={styles.heroActions}>
+              <Link className={styles.primaryCta} href="/auth/register">
+                Начать сейчас
+              </Link>
+              <a className={styles.secondaryCta} href="#programs">
+                Посмотреть программы
+              </a>
+            </div>
+
+            <div className={styles.heroStatsRow}>
+              {heroStats.map((item) => (
+                <article key={item.label} className={styles.heroStatCard}>
+                  <strong>{item.value}</strong>
+                  <span>{item.label}</span>
                 </article>
               ))}
             </div>
-            <div className={styles.whyImages} aria-hidden="true">
-              <div className={styles.whyTall}>
-                <img src={featureImgTall} alt="Тренировка" />
-              </div>
-              <div className={styles.whyStack}>
-                <img src={featureImgWideTop} alt="Командная тренировка" />
-                <img src={featureImgWideBottom} alt="Инвентарь" />
-              </div>
-            </div>
           </div>
+
+          <aside className={styles.heroPanel}>
+            <p className={styles.heroPanelLabel}>Режим недели</p>
+            <div className={styles.heroPanelMetric}>
+              <strong>5/7</strong>
+              <span>тренировочных дней</span>
+            </div>
+            <ul className={styles.heroChecklist}>
+              <li>силовой блок</li>
+              <li>кардио-сессия</li>
+              <li>восстановление и мобильность</li>
+            </ul>
+          </aside>
         </div>
       </section>
 
-      <section className={`${styles.section} ${styles.coaches}`} id="coaches">
-        <div className={styles.sectionInner}>
-          <div className={styles.sectionHeader}>
-            <h2>Познакомьтесь с нашими тренерами</h2>
-            <p>
-              Каждый блок — часть одной команды: функциональный тренинг,
-              плавание, футбол и борьба.
-            </p>
-          </div>
-          <div className={styles.coachRows} role="list">
-            <div
-              className={styles.coachRow}
-              role="listitem"
-              aria-label="Тренеры, верхний ряд"
-            >
-              <div className={`${styles.coachTile} ${styles.tileSmall}`}>
-                <img src={coachTiles[0].src} alt={coachTiles[0].alt} />
-              </div>
-              <div className={`${styles.coachTile} ${styles.tileFlex}`}>
-                <img src={coachTiles[1].src} alt={coachTiles[1].alt} />
-              </div>
-              <div
-                className={`${styles.coachTile} ${styles.tileSmall} ${styles.tileOffset}`}
-              >
-                <img src={coachTiles[2].src} alt={coachTiles[2].alt} />
-              </div>
-            </div>
-            <div
-              className={styles.coachRow}
-              role="listitem"
-              aria-label="Тренеры, нижний ряд"
-            >
-              <div className={`${styles.coachTile} ${styles.tileFlex}`}>
-                <img src={coachTiles[3].src} alt={coachTiles[3].alt} />
-              </div>
-              <div
-                className={`${styles.coachTile} ${styles.tileSmall} ${styles.tileOffset}`}
-              >
-                <img src={coachTiles[4].src} alt={coachTiles[4].alt} />
-              </div>
-              <div className={`${styles.coachTile} ${styles.tileFlex}`}>
-                <img src={coachTiles[5].src} alt={coachTiles[5].alt} />
-              </div>
-            </div>
-          </div>
+      <section className={styles.programSection} id="programs">
+        <div className={styles.sectionHeader}>
+          <p>Ключевые программы</p>
+          <h2>Три маршрута под разные задачи, но один стандарт нагрузки</h2>
+        </div>
+
+        <div className={styles.programGrid}>
+          {programCards.map((item) => (
+            <article key={item.title} className={styles.programCard}>
+              <span>{item.level}</span>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+            </article>
+          ))}
         </div>
       </section>
 
-      <section className={styles.auth} id="cta">
+      <section className={styles.showcaseSection}>
+        <article className={styles.showcasePanel}>
+          <p className={styles.showcaseEyebrow}>our vision</p>
+          <h2>Пробуди зверя внутри. Стань крепче стали.</h2>
+          <p>
+            Primal Training - это программа тренировок, основанная на сырой силе,
+            функциональном фитнесе и надежной поддержке сообщества. Мы помогаем участникам
+            раскрыть первобытную мощь, укрепить дисциплину и выйти на уровень, где результат
+            становится новой нормой.
+          </p>
+          <ul className={styles.principlesList}>
+            {principles.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </article>
+
         <div
-          className={`${styles.sectionInner} ${styles.authInner}`}
-          style={{ gap: "24px", flexWrap: "wrap" }}
+          className={styles.showcaseImage}
+          style={{
+            backgroundImage: `linear-gradient(180deg, rgba(17, 17, 17, 0.08), rgba(17, 17, 17, 0.48)), url(${heroBackground})`,
+          }}
         >
-          {ctaCards.map((card) => {
-            const buttonClass =
-              card.tone === "ghost" ? styles.navGhost : styles.navPrimary;
-            return (
-              <article className={styles.authCard} key={card.title}>
-                <h3>{card.title}</h3>
-                <p>{card.description}</p>
-                <ul
-                  style={{
-                    marginTop: "18px",
-                    marginBottom: "24px",
-                    paddingLeft: "20px",
-                    color: "#dcdcdc",
-                    lineHeight: 1.6,
-                    fontSize: "14px",
-                  }}
-                >
-                  {card.benefits.map((benefit) => (
-                    <li key={benefit}>{benefit}</li>
-                  ))}
-                </ul>
-                <div
-                  className={styles.navActions}
-                  style={{ justifyContent: "flex-start" }}
-                >
-                  <a className={buttonClass} href={card.href}>
-                    {card.action}
-                  </a>
-                  <a className={styles.navGhost} href="#coaches">
-                    Посмотреть тренеров
-                  </a>
-                </div>
+          <div className={styles.visionOverlayCard}>
+            <span>Функциональная сила</span>
+            <strong>Скорость, техника, выносливость</strong>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.metricsSection}>
+        <div className={styles.metricsInner}>
+          <div className={styles.sectionHeaderCompact}>
+            <p>Почему это работает</p>
+            <h2>Одна экосистема вместо разрозненных действий</h2>
+          </div>
+
+          <div className={styles.metricsGrid}>
+            {metrics.map((item) => (
+              <article key={item.label} className={styles.metricCard}>
+                <div className={styles.metricValue}>{item.value}</div>
+                <p>{item.label}</p>
               </article>
-            );
-          })}
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.formatSection} id="format">
+        <div className={styles.formatIntro}>
+          <p>Формат работы</p>
+          <h2>Путь построен так, чтобы прогресс был управляемым и видимым</h2>
+        </div>
+
+        <div className={styles.formatGrid}>
+          {formatCards.map((item, index) => (
+            <article key={item.title} className={styles.formatCard}>
+              <span className={styles.formatIndex}>0{index + 1}</span>
+              <h3>{item.title}</h3>
+              <p>{item.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.ctaSection} id="contacts">
+        <div className={styles.ctaContent}>
+          <p>Готовы включиться в систему</p>
+          <h2>Возьмите первый цикл на 6 недель и начните работать в ритме результата</h2>
+          <div className={styles.heroActions}>
+            <Link className={styles.primaryCta} href="/auth/register">
+              Получить план
+            </Link>
+            <a className={styles.secondaryCtaLight} href="tel:+70000000000">
+              +7 (000) 000-00-00
+            </a>
+          </div>
         </div>
       </section>
 
       <footer className={styles.footer}>
-        <div className={styles.footerBg} aria-hidden="true">
-          <img src={footerBg} alt="" />
-          <div className={styles.footerOverlay} />
+        <div className={styles.footerGrid}>
+          <div>
+            <p className={styles.footerLabel}>FIT CENTER</p>
+            <p className={styles.footerText}>
+              Система подготовки для тех, кто хочет не просто начать, а удержать темп и дойти до результата.
+            </p>
+          </div>
+          <div>
+            <p className={styles.footerLabel}>Контакты</p>
+            <p className={styles.footerText}>+7 (000) 000-00-00</p>
+            <p className={styles.footerText}>hello@fit-center.ru</p>
+          </div>
+          <div>
+            <p className={styles.footerLabel}>Навигация</p>
+            <div className={styles.footerLinks}>
+              {navigationLinks.map((item) => (
+                <a key={item.label} href={item.href}>
+                  {item.label}
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className={styles.footerContent}>
-          <p>Готовы выйти на новый уровень?</p>
-          <h3>Присоединяйтесь уже сейчас</h3>
-          <div className={styles.footerNote}>Ежедневно с 7:00 до 23:00</div>
-        </div>
+        <p className={styles.copyright}>© 2026 FIT CENTER</p>
       </footer>
     </main>
   );
