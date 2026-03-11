@@ -7,3 +7,10 @@ node_modules/
 dist/
 build/
 .env
+**/.env
+.env.prod
+**/.env.prod
+!.env.example
+!**/.env.example
+!.env.prod.example
+!**/.env.prod.example
