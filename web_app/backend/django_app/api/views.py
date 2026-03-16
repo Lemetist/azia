@@ -3,7 +3,11 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-from .serializers import RegisterSerializer, UserSerializer
+from .serializers import (
+    CustomTokenObtainPairSerializer,
+    RegisterSerializer,
+    UserSerializer,
+)
 
 from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -28,7 +32,8 @@ def echo(request):
         OpenApiExample(
             "Пример запроса",
             value={
-                "username": "user123",
+                "email": "user@example.com",
+                "full_name": "Ivan Petrov",
                 "password": "StrongP@ssw0rd",
             },
             request_only=True,
@@ -87,7 +92,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     В urls.py можно подключать эту вьюху вместо стандартной, если хотите,
     чтобы в документации отображалась подробная схема запроса/ответа.
     """
-    pass
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 @extend_schema(
