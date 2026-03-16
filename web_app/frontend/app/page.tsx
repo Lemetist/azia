@@ -2,285 +2,283 @@ import Link from 'next/link';
 
 import styles from './page.module.css';
 
-const heroBackground =
-  'https://www.figma.com/api/mcp/asset/cc575220-a357-4221-98b5-d29f24860867';
-
 const navigationLinks = [
-  { label: 'Главная', href: '#home' },
   { label: 'Программы', href: '#programs' },
-  { label: 'Формат', href: '#format' },
-  { label: 'Контакты', href: '#contacts' },
+  { label: 'Преимущества', href: '#advantages' },
+  { label: 'Сообщество', href: '#community' },
 ];
 
-const heroStats = [
-  { value: '12+', label: 'авторских программ' },
-  { value: '5', label: 'профильных направлений' },
-  { value: '98%', label: 'удержания дисциплины' },
+const streamDetails = [
+  { label: 'Фокус', value: 'Strength + Engine' },
+  { label: 'Тренер', value: 'Marcus Bell' },
+  { label: 'Старт', value: '18 марта' },
 ];
+
+const narrativeTags = ['Сила', 'Функциональность', 'Контроль прогрессии'];
 
 const programCards = [
   {
     title: 'Strength Base',
-    level: 'для силы',
-    description:
-      'Системная прогрессия, техника базовых движений и силовой цикл под конкретную цель.',
+    duration: '8 недель',
+    description: 'Штанга, техника, прогрессия нагрузок и работа на силу без хаоса.',
+    cta: 'Открыть план',
   },
   {
-    title: 'Combat Engine',
-    level: 'для выносливости',
-    description:
-      'Функциональные круги, интервальные блоки и работа в темпе, который держит вас в форме.',
+    title: 'Fight Conditioning',
+    duration: '6 недель',
+    description: 'Интервалы, темп и метаболическая мощность для плотного ритма недели.',
+    cta: 'Смотреть блок',
   },
   {
-    title: 'Athlete Reset',
-    level: 'для восстановления',
-    description:
-      'Мобильность, контроль нагрузки и возвращение в режим без перегруза и хаоса.',
-  },
-];
-
-const principles = [
-  'Тренировки строятся вокруг режима, а не вокруг мотивационных всплесков.',
-  'Каждая неделя имеет измеримую цель и понятную нагрузку.',
-  'Тренер, чат и трекер прогресса работают как одна система.',
-];
-
-const formatCards = [
-  {
-    title: 'Стартовая диагностика',
-    text: 'Фиксируем цели, ограничения, историю тренировок и текущую точку формы.',
-  },
-  {
-    title: 'План на 6 недель',
-    text: 'Вы получаете структуру по нагрузке, восстановлению, контролю и питанию.',
-  },
-  {
-    title: 'Еженедельная корректировка',
-    text: 'Программа обновляется по факту вашего прогресса, а не по шаблону.',
+    title: 'Hybrid Engine',
+    duration: '10 недель',
+    description: 'Сочетание силы, кардио и восстановления для стабильного прогресса.',
+    cta: 'Изучить цикл',
   },
 ];
 
 const metrics = [
-  { value: '24/7', label: 'связь с наставником' },
-  { value: '150+', label: 'спортсменов в системе' },
-  { value: '360°', label: 'контроль нагрузки и сна' },
-  { value: '2026', label: 'новый сезон открыт' },
+  { value: '12+', label: 'Программ подготовки' },
+  { value: '5', label: 'Тренерских направлений' },
+  { value: '24/7', label: 'Поддержка в чате' },
+  { value: '2026', label: 'Новый сезон открыт' },
+];
+
+const featureCards = [
+  {
+    title: 'Сильная система',
+    description:
+      'Каждый цикл собирается из нагрузки, восстановления и контроля техники, а не из случайных тренировок.',
+  },
+  {
+    title: 'Живой ритм',
+    description:
+      'Тренер, расписание и персональные блоки связаны в один поток, чтобы не терять импульс между сессиями.',
+  },
+  {
+    title: 'Прогресс на цифрах',
+    description:
+      'Следим за силой, объемом, посещаемостью и восстановлением, чтобы рост был измеримым, а не на ощущениях.',
+  },
+];
+
+const weeklyFlow = [
+  { day: 'Пн', title: 'Strength forge', meta: '18:30 · Нижняя часть' },
+  { day: 'Ср', title: 'Fight conditioning', meta: '19:00 · Интервалы' },
+  { day: 'Сб', title: 'Mobility reset', meta: '10:15 · Recovery' },
 ];
 
 export default function HomePage() {
   return (
-    <main className={styles.page} id="home">
+    <main className={styles.page}>
       <section className={styles.hero}>
-        <div
-          className={styles.heroImage}
-          style={{ backgroundImage: `url(${heroBackground})` }}
-          aria-hidden="true"
-        />
-        <div className={styles.heroMask} aria-hidden="true" />
+        <div className={styles.shell}>
+          <header className={styles.header}>
+            <Link className={styles.brand} href="/" aria-label="Primal Training">
+              PT
+            </Link>
 
-        <header className={styles.nav}>
-          <button className={styles.search} type="button" aria-label="Поиск">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M11 4.5a6.5 6.5 0 1 0 0 13a6.5 6.5 0 0 0 0-13Zm0-2a8.5 8.5 0 1 1-5.33 15.12l-3.14 3.14a1 1 0 1 1-1.41-1.41l3.14-3.14A8.5 8.5 0 0 1 11 2.5Z"
-                fill="currentColor"
-              />
-            </svg>
-          </button>
-
-          <nav className={styles.navMenu} aria-label="Основное меню">
-            {navigationLinks.map((item, index) => {
-              const isActive = index === 0;
-
-              return (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className={`${styles.navLink} ${isActive ? styles.activeLink : ''}`.trim()}
-                >
-                  <span>{item.label}</span>
-                  {isActive ? <span className={styles.activeLine} aria-hidden="true" /> : null}
+            <nav className={styles.navigation} aria-label="Основная навигация">
+              {navigationLinks.map((item) => (
+                <a key={item.label} className={styles.navLink} href={item.href}>
+                  {item.label}
                 </a>
-              );
-            })}
-          </nav>
-
-          <div className={styles.authActions}>
-            <Link className={styles.loginButton} href="/auth/login">
-              Вход
-            </Link>
-            <Link className={styles.registerButton} href="/auth/register">
-              Регистрация
-            </Link>
-          </div>
-        </header>
-
-        <div className={styles.heroContent}>
-          <div className={styles.heroCopy}>
-            <p className={styles.heroEyebrow}>primal training system</p>
-            <h1 className={styles.heroHeadline}>HARD WORK PAYS.</h1>
-            <p className={styles.heroLead}>
-              Не просто тренировки, а режим, в котором сила, выносливость и дисциплина
-              становятся системой. FIT CENTER соединяет нагрузку, аналитику и сопровождение
-              в один рабочий цикл.
-            </p>
-
-            <div className={styles.heroActions}>
-              <Link className={styles.primaryCta} href="/auth/register">
-                Начать сейчас
-              </Link>
-              <a className={styles.secondaryCta} href="#programs">
-                Посмотреть программы
-              </a>
-            </div>
-
-            <div className={styles.heroStatsRow}>
-              {heroStats.map((item) => (
-                <article key={item.label} className={styles.heroStatCard}>
-                  <strong>{item.value}</strong>
-                  <span>{item.label}</span>
-                </article>
               ))}
+            </nav>
+
+            <div className={styles.headerActions}>
+              <Link className={styles.loginButton} href="/auth/login">
+                Вход
+              </Link>
+              <Link className={styles.registerButton} href="/auth/register">
+                Регистрация
+              </Link>
+            </div>
+          </header>
+
+          <div className={styles.heroIntro}>
+            <p className={styles.eyebrow}>Primal training system</p>
+            <div className={styles.statementBar}>
+              <span>HARD WORK PAYS.</span>
             </div>
           </div>
 
-          <aside className={styles.heroPanel}>
-            <p className={styles.heroPanelLabel}>Режим недели</p>
-            <div className={styles.heroPanelMetric}>
-              <strong>5/7</strong>
-              <span>тренировочных дней</span>
+          <div className={styles.heroGrid}>
+            <div className={styles.heroCopy}>
+              <h1 className={styles.heroTitle}>
+                Пробуди зверя внутри. Стань крепче стали.
+              </h1>
+              <p className={styles.heroLead}>
+                Силовые циклы, функциональная подготовка и понятная прогрессия в одном
+                ритме. Без лишнего шума, но с характером.
+              </p>
+
+              <div className={styles.heroActions}>
+                <Link className={styles.primaryButton} href="/assessment">
+                  Начать цикл
+                </Link>
+                <a className={styles.secondaryButton} href="#weekly-flow">
+                  Посмотреть расписание
+                </a>
+              </div>
             </div>
-            <ul className={styles.heroChecklist}>
-              <li>силовой блок</li>
-              <li>кардио-сессия</li>
-              <li>восстановление и мобильность</li>
-            </ul>
-          </aside>
+
+            <aside className={styles.streamCard}>
+              <p className={styles.cardEyebrow}>Текущий поток</p>
+              <h2 className={styles.streamTitle}>Spring Iron Block</h2>
+              <p className={styles.streamLead}>
+                4 силовые сессии, 2 интервальные работы, 1 восстановительное окно и
+                ревью по итогам недели.
+              </p>
+
+              <div className={styles.streamStats}>
+                {streamDetails.map((item) => (
+                  <div key={item.label} className={styles.streamRow}>
+                    <span>{item.label}</span>
+                    <strong>{item.value}</strong>
+                  </div>
+                ))}
+              </div>
+            </aside>
+          </div>
         </div>
       </section>
 
-      <section className={styles.programSection} id="programs">
-        <div className={styles.sectionHeader}>
-          <p>Ключевые программы</p>
-          <h2>Три маршрута под разные задачи, но один стандарт нагрузки</h2>
-        </div>
-
-        <div className={styles.programGrid}>
-          {programCards.map((item) => (
-            <article key={item.title} className={styles.programCard}>
-              <span>{item.level}</span>
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className={styles.showcaseSection}>
-        <article className={styles.showcasePanel}>
-          <p className={styles.showcaseEyebrow}>our vision</p>
-          <h2>Пробуди зверя внутри. Стань крепче стали.</h2>
-          <p>
-            Primal Training - это программа тренировок, основанная на сырой силе,
-            функциональном фитнесе и надежной поддержке сообщества. Мы помогаем участникам
-            раскрыть первобытную мощь, укрепить дисциплину и выйти на уровень, где результат
-            становится новой нормой.
+      <section className={`${styles.storySection} ${styles.shell}`}>
+        <article className={styles.storyCard}>
+          <p className={styles.sectionEyebrow}>Our vision</p>
+          <h2 className={styles.sectionTitle}>
+            Тренировки, которые собирают дисциплину, а не только усталость.
+          </h2>
+          <p className={styles.sectionText}>
+            Мы строим маршрут от первой сессии до стабильного результата через базовую
+            силу, координацию, функциональную выносливость и понятную нагрузку на каждую
+            неделю.
           </p>
-          <ul className={styles.principlesList}>
-            {principles.map((item) => (
-              <li key={item}>{item}</li>
+
+          <div className={styles.tagRow}>
+            {narrativeTags.map((tag) => (
+              <span key={tag} className={styles.tag}>
+                {tag}
+              </span>
             ))}
-          </ul>
+          </div>
         </article>
 
-        <div
-          className={styles.showcaseImage}
-          style={{
-            backgroundImage: `linear-gradient(180deg, rgba(17, 17, 17, 0.08), rgba(17, 17, 17, 0.48)), url(${heroBackground})`,
-          }}
-        >
-          <div className={styles.visionOverlayCard}>
-            <span>Функциональная сила</span>
-            <strong>Скорость, техника, выносливость</strong>
+        <div className={styles.storyAside}>
+          <span className={styles.floatingPill}>Coach-led</span>
+          <div className={styles.storyQuote}>
+            Режим, в котором каждая неделя ощущается как следующая ступень, а не повтор
+            вчерашнего дня.
           </div>
         </div>
       </section>
 
-      <section className={styles.metricsSection}>
-        <div className={styles.metricsInner}>
-          <div className={styles.sectionHeaderCompact}>
-            <p>Почему это работает</p>
-            <h2>Одна экосистема вместо разрозненных действий</h2>
+      <section className={`${styles.programSection} ${styles.shell}`} id="programs">
+        <div className={styles.programVisual} aria-hidden="true" />
+
+        <article className={styles.programContent}>
+          <p className={styles.sectionEyebrowMuted}>Program tracks</p>
+          <h2 className={styles.sectionTitle}>
+            Разные сценарии подготовки, но один уровень качества.
+          </h2>
+
+          <div className={styles.programGrid}>
+            {programCards.map((item) => (
+              <article key={item.title} className={styles.programCard}>
+                <div className={styles.programHead}>
+                  <h3>{item.title}</h3>
+                  <span>{item.duration}</span>
+                </div>
+                <p>{item.description}</p>
+                <Link className={styles.programButton} href="/assessment">
+                  {item.cta}
+                </Link>
+              </article>
+            ))}
+          </div>
+        </article>
+      </section>
+
+      <section className={styles.metricsSection} id="advantages">
+        <div className={styles.shell}>
+          <div className={styles.metricsIntro}>
+            <div>
+              <p className={styles.sectionEyebrowDark}>Почему это работает</p>
+              <h2 className={`${styles.sectionTitle} ${styles.darkTitle}`}>
+                Из этой идеи получилось нормальное ядро, а не просто красивый экран.
+              </h2>
+            </div>
+            <p className={styles.metricsLead}>
+              Я убрал пустой провал из середины макета и собрал связный лендинг: hero,
+              narrative-блоки, карточки программ, метрики и живой финальный CTA.
+            </p>
           </div>
 
-          <div className={styles.metricsGrid}>
+          <div className={styles.metricGrid}>
             {metrics.map((item) => (
               <article key={item.label} className={styles.metricCard}>
-                <div className={styles.metricValue}>{item.value}</div>
-                <p>{item.label}</p>
+                <strong>{item.value}</strong>
+                <span>{item.label}</span>
+              </article>
+            ))}
+          </div>
+
+          <div className={styles.featureGrid}>
+            {featureCards.map((item) => (
+              <article key={item.title} className={styles.featureCard}>
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className={styles.formatSection} id="format">
-        <div className={styles.formatIntro}>
-          <p>Формат работы</p>
-          <h2>Путь построен так, чтобы прогресс был управляемым и видимым</h2>
+      <section className={`${styles.weeklySection} ${styles.shell}`} id="community">
+        <div className={styles.weeklyCopy}>
+          <p className={styles.sectionEyebrowDark}>Weekly flow</p>
+          <h2 className={`${styles.sectionTitle} ${styles.darkTitle}`} id="weekly-flow">
+            Неделя выглядит как система, а не набор случайных заходов в зал.
+          </h2>
         </div>
 
-        <div className={styles.formatGrid}>
-          {formatCards.map((item, index) => (
-            <article key={item.title} className={styles.formatCard}>
-              <span className={styles.formatIndex}>0{index + 1}</span>
-              <h3>{item.title}</h3>
-              <p>{item.text}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+        <div className={styles.weeklyPanel}>
+          <div className={styles.flowList}>
+            {weeklyFlow.map((item) => (
+              <article key={item.day} className={styles.flowCard}>
+                <div className={styles.flowDay}>{item.day}</div>
+                <div>
+                  <h3>{item.title}</h3>
+                  <p>{item.meta}</p>
+                </div>
+              </article>
+            ))}
+          </div>
 
-      <section className={styles.ctaSection} id="contacts">
-        <div className={styles.ctaContent}>
-          <p>Готовы включиться в систему</p>
-          <h2>Возьмите первый цикл на 6 недель и начните работать в ритме результата</h2>
-          <div className={styles.heroActions}>
-            <Link className={styles.primaryCta} href="/auth/register">
-              Получить план
-            </Link>
-            <a className={styles.secondaryCtaLight} href="tel:+70000000000">
-              +7 (000) 000-00-00
-            </a>
+          <div className={styles.weeklyCta}>
+            <p>
+              Открывай расписание, смотри мобильный сценарий тренировок и веди прогресс
+              в одном приложении.
+            </p>
+            <div className={styles.weeklyActions}>
+              <Link className={styles.primaryButton} href="/assessment">
+                Открыть workouts
+              </Link>
+              <a className={styles.secondaryButtonStrong} href="#advantages">
+                Смотреть прогресс
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
       <footer className={styles.footer}>
-        <div className={styles.footerGrid}>
-          <div>
-            <p className={styles.footerLabel}>FIT CENTER</p>
-            <p className={styles.footerText}>
-              Система подготовки для тех, кто хочет не просто начать, а удержать темп и дойти до результата.
-            </p>
-          </div>
-          <div>
-            <p className={styles.footerLabel}>Контакты</p>
-            <p className={styles.footerText}>+7 (000) 000-00-00</p>
-            <p className={styles.footerText}>hello@fit-center.ru</p>
-          </div>
-          <div>
-            <p className={styles.footerLabel}>Навигация</p>
-            <div className={styles.footerLinks}>
-              {navigationLinks.map((item) => (
-                <a key={item.label} href={item.href}>
-                  {item.label}
-                </a>
-              ))}
-            </div>
-          </div>
+        <div className={styles.footerInner}>
+          <p>Позвоните нам прямо сейчас</p>
+          <a href="tel:+70000000000">+Phone</a>
+          <span>© 2026</span>
         </div>
-        <p className={styles.copyright}>© 2026 FIT CENTER</p>
       </footer>
     </main>
   );

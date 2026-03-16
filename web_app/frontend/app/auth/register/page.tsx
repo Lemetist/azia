@@ -13,34 +13,20 @@ export default function RegisterPage() {
       <section className={styles.formWrap}>
         <div className={styles.grid}>
           <article className={styles.heroPane}>
-            <h1>Начните путь осознанных тренировок</h1>
+            <p className={styles.eyebrow}>Primal training system</p>
+            <h1>Присоединяйся.</h1>
             <p>
-              Расскажите о целях, уровне и предпочтениях — и получите план,
-              который адаптируется под ваш режим. Личный тренер, контроль
-              прогресса и доступ к комьюнити внутри одного аккаунта.
+              Создайте аккаунт, чтобы получить доступ к тренировочным циклам,
+              сопровождению тренера и персональному ритму подготовки.
             </p>
-
-            <div className={styles.heroStats}>
-              <div className={styles.statCard}>
-                <p className={styles.statValue}>7 дней</p>
-                <p className={styles.statLabel}>до персонального плана</p>
-              </div>
-              <div className={styles.statCard}>
-                <p className={styles.statValue}>24/7</p>
-                <p className={styles.statLabel}>поддержка наставника</p>
-              </div>
-              <div className={styles.statCard}>
-                <p className={styles.statValue}>360°</p>
-                <p className={styles.statLabel}>контроль здоровья и нагрузки</p>
-              </div>
+            <div className={styles.heroMeta}>
+              <span className={styles.heroChip}>Персональный план</span>
+              <span className={styles.heroChip}>Трекинг нагрузки</span>
+              <span className={styles.heroChip}>Старт за 1 минуту</span>
             </div>
           </article>
 
-          <AuthCard
-            title="Создать аккаунт FIT CENTER"
-            subtitle="Заполните анкету и получите стартовую консультацию."
-            defaultMode="register"
-          />
+          <AuthCard mode="register" />
         </div>
       </section>
     </main>
