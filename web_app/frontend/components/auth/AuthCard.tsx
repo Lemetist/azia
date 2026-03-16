@@ -125,7 +125,7 @@ function saveTokens(access: string, refresh: string) {
   } catch {}
 }
 
-function getErrorMessage(payload: unknown, fallback: string) {
+function getErrorMessage(payload: unknown, fallback: string): string {
   if (typeof payload === "string" && payload.trim()) {
     return payload;
   }
@@ -158,7 +158,7 @@ function getErrorMessage(payload: unknown, fallback: string) {
   return fallback;
 }
 
-async function fetchJson(input: RequestInfo, init?: RequestInit) {
+async function fetchJson(input: RequestInfo, init?: RequestInit): Promise<unknown> {
   const response = await fetch(input, init);
   const text = await response.text();
   let data: unknown;

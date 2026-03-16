@@ -1,9 +1,5 @@
 import './globals.css';
 import Script from 'next/script';
-import { Rubik, Vazirmatn } from 'next/font/google';
-
-const rubik = Rubik({ subsets: ['latin', 'cyrillic'], weight: ['400', '500', '700'] });
-const vazirmatn = Vazirmatn({ subsets: ['arabic', 'latin'], weight: ['400', '500'] });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const shouldLoadFigmaCapture =
@@ -11,7 +7,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="ru">
-      <body className={`${rubik.className} ${vazirmatn.className}`}>
+      <body>
         {shouldLoadFigmaCapture ? (
           <Script
             src="https://mcp.figma.com/mcp/html-to-design/capture.js"
