@@ -1,0 +1,816 @@
+.page {
+  min-height: 100vh;
+  padding: 36px 18px 64px;
+  background:
+    radial-gradient(circle at top left, rgba(58, 66, 118, 0.18), transparent 24%),
+    radial-gradient(circle at 85% 18%, rgba(238, 171, 87, 0.16), transparent 22%),
+    linear-gradient(180deg, #f8f6f2 0%, #ece7df 100%);
+}
+
+.canvas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 28px;
+  margin: 0 auto;
+}
+
+.phoneShell {
+  --scale: 0.78;
+  flex: 0 0 auto;
+  height: calc(812px * var(--scale));
+  position: relative;
+  width: calc(375px * var(--scale));
+}
+
+.phone {
+  border-radius: 30px;
+  box-shadow: 0 32px 80px rgba(33, 38, 58, 0.18);
+  height: 812px;
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  transform: scale(var(--scale));
+  transform-origin: top left;
+  width: 375px;
+}
+
+.statusBar {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  left: 0;
+  padding: 16px 18px 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 4;
+}
+
+.statusTime {
+  color: currentColor;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.statusIcons {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.signalBars {
+  align-items: flex-end;
+  display: inline-flex;
+  gap: 2px;
+  height: 10px;
+}
+
+.signalBars i {
+  background: currentColor;
+  border-radius: 999px;
+  display: block;
+  width: 2px;
+}
+
+.signalBars i:nth-child(1) {
+  height: 4px;
+}
+
+.signalBars i:nth-child(2) {
+  height: 6px;
+}
+
+.signalBars i:nth-child(3) {
+  height: 8px;
+}
+
+.signalBars i:nth-child(4) {
+  height: 10px;
+}
+
+.wifiIcon {
+  align-items: center;
+  display: inline-flex;
+  height: 10px;
+  justify-content: center;
+  width: 12px;
+}
+
+.wifiIcon i {
+  border: 1.7px solid currentColor;
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-radius: 999px 999px 0 0;
+  display: block;
+  height: 8px;
+  transform: scaleX(1.25);
+  width: 8px;
+}
+
+.batteryIcon {
+  border: 1.6px solid currentColor;
+  border-radius: 3px;
+  display: inline-flex;
+  height: 10px;
+  padding: 1px;
+  position: relative;
+  width: 19px;
+}
+
+.batteryIcon::after {
+  background: currentColor;
+  border-radius: 0 2px 2px 0;
+  content: "";
+  height: 4px;
+  position: absolute;
+  right: -3px;
+  top: 2px;
+  width: 2px;
+}
+
+.batteryIcon span {
+  background: currentColor;
+  border-radius: 2px;
+  display: block;
+  height: 100%;
+  width: 70%;
+}
+
+.heroPhone {
+  background:
+    linear-gradient(180deg, rgba(10, 12, 18, 0.08) 0%, rgba(10, 12, 18, 0.78) 84%),
+    url("/images/gym-reference.jpg") center/cover;
+  color: #fffdf7;
+}
+
+.heroGlow {
+  background:
+    radial-gradient(circle, rgba(240, 193, 112, 0.28) 0%, rgba(240, 193, 112, 0) 70%);
+  height: 280px;
+  left: 20px;
+  position: absolute;
+  top: 220px;
+  width: 280px;
+}
+
+.heroContent {
+  bottom: 44px;
+  left: 28px;
+  position: absolute;
+  right: 28px;
+  z-index: 2;
+}
+
+.heroEyebrow {
+  color: rgba(255, 246, 228, 0.8);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  margin: 0 0 16px;
+  text-transform: uppercase;
+}
+
+.heroTitle {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 0.88;
+  margin: 0;
+  max-width: 300px;
+}
+
+.heroText {
+  color: rgba(255, 248, 236, 0.78);
+  font-size: 14px;
+  margin: 12px 0 0;
+  max-width: 238px;
+}
+
+.lightCta,
+.darkCta,
+.darkCtaWide {
+  align-items: center;
+  appearance: none;
+  border: 0;
+  border-radius: 20px;
+  display: inline-flex;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  gap: 10px;
+  justify-content: center;
+}
+
+.lightCta {
+  background: rgba(255, 255, 255, 0.96);
+  color: #1d1d26;
+  margin-top: 22px;
+  min-width: 286px;
+  padding: 17px 24px;
+}
+
+.detailPhone,
+.listPhone {
+  background: #ffffff;
+  color: #1d2233;
+}
+
+.metricsPhone {
+  background: #ffffff;
+  color: #1d2233;
+}
+
+.topHeader {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  left: 18px;
+  position: absolute;
+  right: 18px;
+  top: 58px;
+  z-index: 3;
+}
+
+.screenTitle {
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.roundButton,
+.roundButtonMuted,
+.roundButtonGhost,
+.smallIconButton,
+.listBack,
+.sideArrow,
+.listDots,
+.segmentButton {
+  appearance: none;
+  border: 0;
+  font: inherit;
+}
+
+.roundButton,
+.roundButtonMuted,
+.roundButtonGhost,
+.smallIconButton,
+.listBack {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  height: 38px;
+  justify-content: center;
+  width: 38px;
+}
+
+.roundButton {
+  background: #f3f3f4;
+  color: #252a42;
+}
+
+.roundButtonMuted {
+  background: rgba(35, 41, 77, 0.08);
+  color: #252a42;
+  letter-spacing: 0.2em;
+}
+
+.featureStage {
+  align-items: center;
+  display: flex;
+  height: 346px;
+  justify-content: center;
+  margin-top: 102px;
+  position: relative;
+}
+
+.featureHalo {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(61, 73, 138, 0.18) 0%, rgba(61, 73, 138, 0.02) 62%, transparent 72%);
+  border-radius: 999px;
+  height: 280px;
+  position: absolute;
+  width: 280px;
+}
+
+.featureDisc {
+  align-items: center;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.78), rgba(243, 239, 231, 0.18)),
+    linear-gradient(180deg, #f3f1ec 0%, #ece7df 100%);
+  border-radius: 50%;
+  box-shadow: 0 18px 42px rgba(69, 77, 122, 0.14);
+  display: flex;
+  height: 220px;
+  justify-content: center;
+  position: relative;
+  width: 220px;
+}
+
+.featureDisc::before {
+  border: 1px solid rgba(35, 41, 77, 0.08);
+  border-radius: 50%;
+  content: "";
+  inset: 12px;
+  position: absolute;
+}
+
+.featureImage {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(17, 18, 29, 0.18)),
+    url("/images/gym-bg.png") center/cover;
+  border-radius: 26px;
+  box-shadow: 0 22px 40px rgba(44, 51, 83, 0.22);
+  height: 136px;
+  transform: rotate(-10deg);
+  width: 164px;
+}
+
+.featureBadge {
+  background: #23294d;
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  left: 50%;
+  letter-spacing: 0.08em;
+  padding: 10px 16px;
+  position: absolute;
+  top: 52px;
+  transform: translateX(-50%);
+  text-transform: uppercase;
+}
+
+.sideArrow {
+  align-items: center;
+  background: rgba(243, 243, 244, 0.92);
+  border-radius: 20px;
+  color: rgba(35, 41, 77, 0.56);
+  display: inline-flex;
+  height: 102px;
+  justify-content: center;
+  position: absolute;
+  top: 120px;
+  width: 44px;
+}
+
+.sideArrowLeft {
+  left: 0;
+}
+
+.sideArrowRight {
+  right: 0;
+}
+
+.detailBody {
+  padding: 0 30px;
+  text-align: center;
+}
+
+.featureTitle {
+  font-size: 31px;
+  letter-spacing: -0.05em;
+  line-height: 0.96;
+  margin: 0;
+}
+
+.featureMeta {
+  color: #777b8d;
+  font-size: 14px;
+  margin: 10px auto 0;
+  max-width: 260px;
+}
+
+.metaRow {
+  align-items: center;
+  color: rgba(29, 34, 51, 0.55);
+  display: flex;
+  font-size: 16px;
+  font-weight: 700;
+  gap: 24px;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.primaryPanel {
+  bottom: 30px;
+  left: 18px;
+  position: absolute;
+  right: 18px;
+}
+
+.darkCta,
+.darkCtaWide {
+  background: #23294d;
+  color: #ffffff;
+  min-width: 100%;
+  padding: 22px 24px;
+}
+
+.metricsHero {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.22) 100%),
+    linear-gradient(135deg, #f1ede6 0%, #e1d7cb 100%);
+  height: 387px;
+  position: relative;
+}
+
+.metricsHero::before {
+  background:
+    linear-gradient(180deg, rgba(17, 22, 39, 0.04), rgba(17, 22, 39, 0.36)),
+    url("/images/gym-reference.jpg") center/cover;
+  border-bottom-left-radius: 34px;
+  border-bottom-right-radius: 34px;
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.overlayHeader {
+  align-items: center;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  left: 18px;
+  position: absolute;
+  right: 18px;
+  top: 58px;
+  z-index: 3;
+}
+
+.overlayTitle {
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.roundButtonGhost {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  letter-spacing: 0.2em;
+}
+
+.metricsImageWrap {
+  inset: 118px 0 auto;
+  position: absolute;
+  z-index: 2;
+}
+
+.metricsImageGlow {
+  background: radial-gradient(circle, rgba(255, 245, 218, 0.34), transparent 70%);
+  height: 280px;
+  left: 50%;
+  position: absolute;
+  top: -10px;
+  transform: translateX(-50%);
+  width: 280px;
+}
+
+.metricsImageCard {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(13, 17, 31, 0.22)),
+    url("/images/gym-bg.png") center/cover;
+  border-radius: 28px;
+  box-shadow: 0 18px 48px rgba(24, 28, 44, 0.24);
+  height: 174px;
+  left: 50%;
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%) rotate(-7deg);
+  width: 218px;
+}
+
+.metricsCard {
+  background: #ffffff;
+  border-radius: 30px;
+  bottom: 0;
+  left: 0;
+  padding: 28px 22px 22px;
+  position: absolute;
+  right: 0;
+  top: 340px;
+}
+
+.metricsHeading {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.metricsHeading h3 {
+  font-size: 25px;
+  margin: 0;
+}
+
+.metricsHeading p {
+  color: #b4b2b6;
+  font-size: 15px;
+  margin: 8px 0 0;
+}
+
+.metricsStat {
+  text-align: right;
+}
+
+.metricsStat strong {
+  display: block;
+  font-size: 24px;
+}
+
+.metricsStat span {
+  color: #8f8b8d;
+  display: block;
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+.phaseList {
+  display: grid;
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.phaseRow {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+}
+
+.phaseIcon {
+  align-items: center;
+  display: inline-flex;
+  gap: 3px;
+  justify-content: center;
+  width: 42px;
+}
+
+.phaseIcon i {
+  border-radius: 999px;
+  display: block;
+  height: 10px;
+  width: 10px;
+}
+
+.phaseIcongold i {
+  background: #f4c567;
+}
+
+.phaseIconindigo i {
+  background: #7f88c9;
+}
+
+.phaseIconcoral i {
+  background: #f49d8d;
+}
+
+.phaseCopy {
+  flex: 1;
+}
+
+.phaseHead {
+  align-items: center;
+  color: #252631;
+  display: flex;
+  font-size: 17px;
+  font-weight: 600;
+  justify-content: space-between;
+}
+
+.phaseHead span:last-child {
+  color: #86858a;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.phaseTrack {
+  background: #e7e7ea;
+  border-radius: 999px;
+  height: 2px;
+  margin-top: 12px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.phaseFill {
+  border-radius: inherit;
+  height: 100%;
+}
+
+.phaseFillgold {
+  background: #f3b143;
+}
+
+.phaseFillindigo {
+  background: #5964b4;
+}
+
+.phaseFillcoral {
+  background: #ef7d65;
+}
+
+.darkCtaWide {
+  margin-top: 28px;
+}
+
+.listHeader {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  left: 18px;
+  position: absolute;
+  right: 18px;
+  top: 58px;
+}
+
+.listBack {
+  background: rgba(243, 243, 244, 0.72);
+  color: #23294d;
+}
+
+.listLabel,
+.listTitle {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.listLabel {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.listTitle {
+  font-size: 26px;
+  line-height: 1.1;
+}
+
+.listActions {
+  display: flex;
+  gap: 8px;
+}
+
+.smallIconButton {
+  background: rgba(243, 243, 244, 0.9);
+  color: #23294d;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.dayScroller {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  left: 18px;
+  position: absolute;
+  right: 18px;
+  top: 134px;
+}
+
+.dayCard {
+  background: #f3f3f3;
+  border-radius: 12px;
+  color: #3c3c3c;
+  display: grid;
+  justify-items: center;
+  padding: 14px 0 12px;
+}
+
+.dayCard span {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.dayCard strong {
+  color: #adacac;
+  font-size: 18px;
+  margin-top: 8px;
+}
+
+.dayCardActive {
+  background: #23294d;
+  color: #ffffff;
+}
+
+.dayCardActive strong {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.segmentedControl {
+  background: #efefef;
+  border-radius: 30px;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(3, 1fr);
+  left: 41px;
+  padding: 3px;
+  position: absolute;
+  right: 41px;
+  top: 241px;
+}
+
+.segmentButton {
+  background: transparent;
+  border-radius: 999px;
+  color: #2d2c35;
+  font-size: 14px;
+  padding: 12px 0;
+}
+
+.segmentButtonActive {
+  background: #fafafa;
+  box-shadow: 0 8px 18px rgba(194, 194, 194, 0.28);
+}
+
+.workoutList {
+  display: grid;
+  gap: 16px;
+  left: 22px;
+  position: absolute;
+  right: 22px;
+  top: 312px;
+}
+
+.workoutCard {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+}
+
+.workoutAccent {
+  border-radius: 20px;
+  flex: 0 0 48px;
+  height: 48px;
+}
+
+.workoutAccentindigo {
+  background: linear-gradient(135deg, #d7dcff, #6671c2);
+}
+
+.workoutAccentgold {
+  background: linear-gradient(135deg, #f5d488, #efa53a);
+}
+
+.workoutAccentcoral {
+  background: linear-gradient(135deg, #ffd2c8, #f08161);
+}
+
+.workoutAccentmint {
+  background: linear-gradient(135deg, #d8f1e6, #65b695);
+}
+
+.workoutInfo {
+  flex: 1;
+}
+
+.workoutInfo h3 {
+  font-size: 23px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.workoutInfo p {
+  color: #9a9999;
+  font-size: 12px;
+  margin: 6px 0 0;
+  letter-spacing: 0.02em;
+}
+
+.listDots {
+  background: transparent;
+  color: #838389;
+  font-size: 16px;
+  letter-spacing: 0.16em;
+}
+
+@media (max-width: 1320px) {
+  .phoneShell {
+    --scale: 0.72;
+  }
+}
+
+@media (max-width: 1180px) {
+  .canvas {
+    gap: 20px;
+  }
+
+  .phoneShell {
+    --scale: 0.76;
+  }
+}
+
+@media (max-width: 740px) {
+  .page {
+    padding: 20px 8px 40px;
+  }
+
+  .phoneShell {
+    --scale: 0.66;
+  }
+}
