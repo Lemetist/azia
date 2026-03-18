@@ -66,6 +66,16 @@ def me(request):
 # Документируем стандартные вьюхи simplejwt для более понятной схемы в Swagger/UI
 
 @extend_schema(
+    examples=[
+        OpenApiExample(
+            name="Пример запроса",
+            value={
+                "email": "user@example.com", 
+                "full_name": "Ivan Petrov",
+                "password": "StrongP@ssw0rd"
+            }
+        )
+    ],
     request={
         "type": "object",
         "properties": {
@@ -75,6 +85,7 @@ def me(request):
     },
     responses={
         200: OpenApiResponse(
+            description="Успешная авторизация",
             response={
                 "type": "object",
                 "properties": {
@@ -86,6 +97,7 @@ def me(request):
     },
     description="Получение пары JWT (access + refresh) по username/password",
 )
+
 class CustomTokenObtainPairView(TokenObtainPairView):
     """
     Обёртка над TokenObtainPairView с аннотацией схемы.
