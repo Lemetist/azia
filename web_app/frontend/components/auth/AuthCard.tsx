@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
+import {
+  loginWithCredentials,
+  registerWithCredentials,
+} from "../../lib/session";
 import styles from "./auth-card.module.css";
 
 export type AuthMode = "login" | "register";
@@ -20,15 +24,19 @@ type AuthCardProps = {
   onRegister?(credentials: Credentials): void | Promise<void>;
 };
 
-type ApiError = Error & {
+type AuthFieldErrors = {
+  fullName?: string;
+  email?: string;
+  password?: string;
+  form?: string;
+};
+
+type ApiLikeError = Error & {
   status?: number;
   payload?: unknown;
 };
 
-const API_BASE =
-  typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_BASE
-    ? process.env.NEXT_PUBLIC_API_BASE.replace(/\/$/, "")
-    : "/api";
+const DASHBOARD_PATH = "/overview";
 
 function MailIcon() {
   return (
@@ -118,13 +126,6 @@ function GoogleIcon() {
   );
 }
 
-function saveTokens(access: string, refresh: string) {
-  try {
-    localStorage.setItem("access", access);
-    localStorage.setItem("refresh", refresh);
-  } catch {}
-}
-
 function getErrorMessage(payload: unknown, fallback: string): string {
   if (typeof payload === "string" && payload.trim()) {
     return payload;
@@ -158,26 +159,72 @@ function getErrorMessage(payload: unknown, fallback: string): string {
   return fallback;
 }
 
-async function fetchJson(input: RequestInfo, init?: RequestInit): Promise<unknown> {
-  const response = await fetch(input, init);
-  const text = await response.text();
-  let data: unknown;
+function validateFields(payload: Credentials, mode: AuthMode): AuthFieldErrors {
+  const nextErrors: AuthFieldErrors = {};
 
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = text;
+  if (mode === "register" && (!payload.fullName || payload.fullName.trim().length < 2)) {
+    nextErrors.fullName = "Введите имя не короче 2 символов.";
   }
 
-  if (!response.ok) {
-    const message = getErrorMessage(data, response.statusText || "Request failed");
-    const error = new Error(message || "Request failed") as ApiError;
-    error.status = response.status;
-    error.payload = data;
-    throw error;
+  if (!payload.email) {
+    nextErrors.email = "Введите email.";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) {
+    nextErrors.email = "Введите корректный email.";
   }
 
-  return data;
+  if (!payload.password) {
+    nextErrors.password = "Введите пароль.";
+  } else if (payload.password.length < 8) {
+    nextErrors.password = "Пароль должен быть не короче 8 символов.";
+  }
+
+  return nextErrors;
+}
+
+function getAuthFieldErrors(error: unknown, mode: AuthMode): AuthFieldErrors {
+  const nextErrors: AuthFieldErrors = {};
+  const apiError = error as ApiLikeError;
+  const payload = apiError?.payload;
+
+  if (apiError?.status === 0) {
+    nextErrors.form =
+      "Нет соединения с сервером. Проверьте, что backend запущен на локальной машине.";
+    return nextErrors;
+  }
+
+  if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+    const record = payload as Record<string, unknown>;
+
+    if ("email" in record) {
+      nextErrors.email = getErrorMessage(record.email, "Проверьте email.");
+    }
+
+    if ("password" in record) {
+      nextErrors.password = getErrorMessage(record.password, "Проверьте пароль.");
+    }
+
+    if ("full_name" in record) {
+      nextErrors.fullName = getErrorMessage(record.full_name, "Проверьте имя.");
+    }
+
+    if ("username" in record && mode === "login") {
+      nextErrors.email = getErrorMessage(record.username, "Проверьте email.");
+    }
+
+    if ("non_field_errors" in record || "detail" in record || "message" in record) {
+      nextErrors.form = getErrorMessage(payload, "Не удалось выполнить операцию.");
+    }
+  }
+
+  if (!nextErrors.form && error instanceof Error) {
+    nextErrors.form = error.message;
+  }
+
+  if (!nextErrors.form && !nextErrors.email && !nextErrors.password && !nextErrors.fullName) {
+    nextErrors.form = "Не удалось выполнить операцию. Попробуйте еще раз.";
+  }
+
+  return nextErrors;
 }
 
 export default function AuthCard({
@@ -190,54 +237,13 @@ export default function AuthCard({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
   const [loading, setLoading] = useState(false);
-
-  async function loginViaApi(emailValue: string, passwordValue: string) {
-    const normalizedEmail = emailValue.trim().toLowerCase();
-    const body = JSON.stringify({ username: normalizedEmail, password: passwordValue });
-    const data = (await fetchJson(`${API_BASE}/auth/token/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body,
-    })) as { access?: string; refresh?: string };
-
-    if (!data.access || !data.refresh) {
-      throw new Error("Не удалось получить токены доступа.");
-    }
-
-    saveTokens(data.access, data.refresh);
-
-    try {
-      const me = await fetchJson(`${API_BASE}/auth/me/`, {
-        method: "GET",
-        headers: { Authorization: `Bearer ${data.access}` },
-      });
-      localStorage.setItem("me", JSON.stringify(me));
-    } catch {}
-  }
-
-  async function registerViaApi(
-    fullNameValue: string,
-    emailValue: string,
-    passwordValue: string
-  ) {
-    const normalizedEmail = emailValue.trim().toLowerCase();
-    const body = JSON.stringify({
-      email: normalizedEmail,
-      full_name: fullNameValue.trim(),
-      password: passwordValue,
-    });
-    await fetchJson(`${API_BASE}/auth/register/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body,
-    });
-    await loginViaApi(normalizedEmail, passwordValue);
-  }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setStatus(null);
+    setFieldErrors({});
     setLoading(true);
 
     const payload: Credentials = {
@@ -246,31 +252,41 @@ export default function AuthCard({
       password,
     };
 
+    const validationErrors = validateFields(payload, mode);
+    if (Object.keys(validationErrors).length > 0) {
+      setFieldErrors(validationErrors);
+      setStatus("Проверьте заполнение формы.");
+      setLoading(false);
+      return;
+    }
+
     try {
       if (mode === "login") {
         if (onLogin) {
           await onLogin(payload);
         } else {
-          await loginViaApi(payload.email, payload.password);
+          await loginWithCredentials(payload.email, payload.password);
         }
         setStatus("Успешный вход. Перенаправляем...");
       } else {
         if (onRegister) {
           await onRegister(payload);
         } else {
-          await registerViaApi(payload.fullName || "", payload.email, payload.password);
+          await registerWithCredentials(
+            payload.fullName || "",
+            payload.email,
+            payload.password
+          );
         }
         setStatus("Аккаунт создан. Перенаправляем...");
       }
 
-      router.push("/");
+      router.push(DASHBOARD_PATH);
       router.refresh();
     } catch (error) {
-      setStatus(
-        error instanceof Error
-          ? error.message
-          : "Не удалось выполнить операцию. Попробуйте еще раз."
-      );
+      const nextErrors = getAuthFieldErrors(error, mode);
+      setFieldErrors(nextErrors);
+      setStatus(nextErrors.form ?? "Не удалось выполнить операцию. Попробуйте еще раз.");
     } finally {
       setLoading(false);
     }
@@ -282,7 +298,9 @@ export default function AuthCard({
         {mode === "register" ? (
           <label className={styles.field}>
             <span className={styles.label}>Имя</span>
-            <span className={styles.inputShell}>
+            <span
+              className={`${styles.inputShell} ${fieldErrors.fullName ? styles.inputShellError : ""}`}
+            >
               <span className={styles.inputIcon}>
                 <UserIcon />
               </span>
@@ -293,14 +311,20 @@ export default function AuthCard({
                 onChange={(event) => setFullName(event.target.value)}
                 required
                 disabled={loading}
+                aria-invalid={fieldErrors.fullName ? "true" : "false"}
               />
             </span>
+            {fieldErrors.fullName ? (
+              <span className={styles.fieldError}>{fieldErrors.fullName}</span>
+            ) : null}
           </label>
         ) : null}
 
         <label className={styles.field}>
           <span className={styles.label}>E-Mail</span>
-          <span className={styles.inputShell}>
+          <span
+            className={`${styles.inputShell} ${fieldErrors.email ? styles.inputShellError : ""}`}
+          >
             <span className={styles.inputIcon}>
               <MailIcon />
             </span>
@@ -312,13 +336,19 @@ export default function AuthCard({
               required
               disabled={loading}
               autoComplete="email"
+              aria-invalid={fieldErrors.email ? "true" : "false"}
             />
           </span>
+          {fieldErrors.email ? (
+            <span className={styles.fieldError}>{fieldErrors.email}</span>
+          ) : null}
         </label>
 
         <label className={styles.field}>
           <span className={styles.label}>Пароль</span>
-          <span className={styles.inputShell}>
+          <span
+            className={`${styles.inputShell} ${fieldErrors.password ? styles.inputShellError : ""}`}
+          >
             <span className={styles.inputIcon}>
               <LockIcon />
             </span>
@@ -331,8 +361,12 @@ export default function AuthCard({
               required
               disabled={loading}
               autoComplete={mode === "login" ? "current-password" : "new-password"}
+              aria-invalid={fieldErrors.password ? "true" : "false"}
             />
           </span>
+          {fieldErrors.password ? (
+            <span className={styles.fieldError}>{fieldErrors.password}</span>
+          ) : null}
         </label>
 
         <button className={styles.primaryButton} type="submit" disabled={loading}>
@@ -371,7 +405,14 @@ export default function AuthCard({
         </Link>
       </div>
 
-      {status ? <p className={styles.status}>{status}</p> : null}
+      {status ? (
+        <p
+          className={`${styles.status} ${fieldErrors.form ? styles.statusError : styles.statusSuccess}`}
+          role="alert"
+        >
+          {status}
+        </p>
+      ) : null}
     </article>
   );
 }

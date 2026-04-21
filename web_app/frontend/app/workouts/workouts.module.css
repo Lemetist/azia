@@ -204,6 +204,23 @@
   font-weight: 700;
   gap: 10px;
   justify-content: center;
+  cursor: pointer;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease;
+}
+
+.lightCta:hover,
+.darkCta:hover,
+.darkCtaWide:hover,
+.roundButton:hover,
+.roundButtonMuted:hover,
+.roundButtonGhost:hover,
+.smallIconButton:hover,
+.listBack:hover,
+.sideArrow:hover,
+.segmentButton:hover,
+.workoutCard:hover,
+.dayCard:hover {
+  transform: translateY(-1px);
 }
 
 .lightCta {
@@ -395,6 +412,15 @@
   gap: 24px;
   justify-content: center;
   margin-top: 18px;
+}
+
+.detailNote {
+  min-height: 42px;
+  margin: 16px auto 0;
+  max-width: 280px;
+  color: #61677a;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .primaryPanel {
@@ -663,6 +689,18 @@
   font-weight: 700;
 }
 
+.smallIconButton,
+.roundButton,
+.roundButtonMuted,
+.roundButtonGhost,
+.listBack,
+.sideArrow,
+.segmentButton,
+.dayCard,
+.workoutCard {
+  cursor: pointer;
+}
+
 .dayScroller {
   display: grid;
   gap: 10px;
@@ -674,6 +712,8 @@
 }
 
 .dayCard {
+  width: 100%;
+  border: 0;
   background: #f3f3f3;
   border-radius: 12px;
   color: #3c3c3c;
@@ -717,6 +757,7 @@
 
 .segmentButton {
   background: transparent;
+  border: 0;
   border-radius: 999px;
   color: #2d2c35;
   font-size: 14px;
@@ -734,13 +775,25 @@
   left: 22px;
   position: absolute;
   right: 22px;
-  top: 312px;
+  top: 346px;
 }
 
 .workoutCard {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid transparent;
+  border-radius: 24px;
+  background: rgba(243, 243, 244, 0.36);
   align-items: center;
   display: flex;
   gap: 14px;
+  text-align: left;
+}
+
+.workoutCardActive {
+  background: rgba(35, 41, 77, 0.08);
+  border-color: rgba(35, 41, 77, 0.12);
+  box-shadow: 0 14px 28px rgba(35, 41, 77, 0.08);
 }
 
 .workoutAccent {
@@ -787,6 +840,17 @@
   color: #838389;
   font-size: 16px;
   letter-spacing: 0.16em;
+}
+
+.listStatus {
+  left: 24px;
+  right: 24px;
+  top: 292px;
+  position: absolute;
+  margin: 0;
+  color: #666d7e;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 @media (max-width: 1320px) {

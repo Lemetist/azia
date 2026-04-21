@@ -1,6 +1,22 @@
-from rest_framework import serializers
 from django.contrib.auth.models import User
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth import authenticate
+from rest_framework import serializers
+
+from .models import Coach, ScheduleSlot, Workout, WorkoutPhase
+from .tokens import (
+    get_user_from_refresh_token,
+    issue_access_token,
+    issue_refresh_token,
+)
+
+try:
+    from drf_spectacular.utils import extend_schema_field
+except ModuleNotFoundError:
+    def extend_schema_field(_field_type):
+        def decorator(func):
+            return func
+
+        return decorator
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -16,7 +32,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     def validate_email(self, value):
         normalized_email = value.strip().lower()
 
-        if User.objects.filter(username=normalized_email).exists():
+        if User.objects.filter(username__iexact=normalized_email).exists():
             raise serializers.ValidationError("Пользователь с таким email уже существует.")
 
         return normalized_email
@@ -49,17 +65,192 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ["id", "username", "email", "full_name"]
 
+    @extend_schema_field(str)
     def get_full_name(self, obj):
         return obj.get_full_name().strip()
 
 
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+class CustomTokenObtainPairSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(trim_whitespace=False)
+    access = serializers.CharField(read_only=True)
+    refresh = serializers.CharField(read_only=True)
+
     def validate(self, attrs):
-        username = attrs.get(self.username_field, "")
+        username = attrs.get("username", "").strip()
+        password = attrs.get("password", "")
+        lookup_username = username
 
-        if isinstance(username, str) and username.strip():
-            user = User.objects.filter(username__iexact=username.strip()).first()
+        if username:
+            user = User.objects.filter(username__iexact=username).first()
             if user:
-                attrs[self.username_field] = user.get_username()
+                lookup_username = user.get_username()
 
-        return super().validate(attrs)
+        authenticated_user = authenticate(username=lookup_username, password=password)
+        if authenticated_user is None or not authenticated_user.is_active:
+            raise serializers.ValidationError("Неверный email или пароль.")
+
+        return {
+            "access": issue_access_token(authenticated_user),
+            "refresh": issue_refresh_token(authenticated_user),
+        }
+
+
+class TokenObtainPairRequestSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+
+
+class TokenPairResponseSerializer(serializers.Serializer):
+    access = serializers.CharField()
+    refresh = serializers.CharField()
+
+
+class TokenRefreshRequestSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
+
+class TokenRefreshResponseSerializer(serializers.Serializer):
+    access = serializers.CharField()
+
+
+class TokenRefreshSerializer(serializers.Serializer):
+    refresh = serializers.CharField(write_only=True)
+    access = serializers.CharField(read_only=True)
+
+    def validate(self, attrs):
+        user = get_user_from_refresh_token(attrs["refresh"])
+        return {"access": issue_access_token(user)}
+
+
+class CoachSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Coach
+        fields = [
+            "name",
+            "role",
+            "focus",
+            "experience",
+            "availability",
+            "speciality",
+            "image",
+        ]
+
+
+class WorkoutPhaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkoutPhase
+        fields = ["label", "value", "tone", "width"]
+
+
+class WorkoutSerializer(serializers.ModelSerializer):
+    phases = WorkoutPhaseSerializer(many=True, read_only=True)
+    days = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Workout
+        fields = [
+            "slug",
+            "title",
+            "category",
+            "accent",
+            "list_meta",
+            "detail_meta",
+            "description",
+            "duration",
+            "calories",
+            "level",
+            "hero_eyebrow",
+            "hero_lead",
+            "days",
+            "phases",
+        ]
+
+    def get_days(self, obj):
+        day_ids = (
+            obj.schedule_slots.order_by("day_id", "position")
+            .values_list("day_id", flat=True)
+            .distinct()
+        )
+        return list(day_ids)
+
+
+class ScheduleSessionSerializer(serializers.ModelSerializer):
+    coach = serializers.CharField(source="coach.name")
+    workout_slug = serializers.CharField(source="workout.slug")
+
+    class Meta:
+        model = ScheduleSlot
+        fields = [
+            "time",
+            "title",
+            "meta",
+            "coach",
+            "spots",
+            "status",
+            "workout_slug",
+        ]
+
+
+class OverviewStatSerializer(serializers.Serializer):
+    label = serializers.CharField()
+    value = serializers.CharField()
+    change = serializers.CharField()
+    tone = serializers.CharField()
+
+
+class RecoverySignalSerializer(serializers.Serializer):
+    label = serializers.CharField()
+    value = serializers.CharField()
+    status = serializers.CharField()
+
+
+class NextWorkoutSerializer(serializers.Serializer):
+    title = serializers.CharField()
+    coach = serializers.CharField()
+    time = serializers.CharField()
+    tag = serializers.CharField()
+
+
+class CycleStatusSerializer(serializers.Serializer):
+    week = serializers.CharField()
+    focus = serializers.CharField()
+    slots_filled = serializers.CharField()
+    readiness = serializers.CharField()
+
+
+class DashboardSummarySerializer(serializers.Serializer):
+    stats = OverviewStatSerializer(many=True)
+    recovery_signals = RecoverySignalSerializer(many=True)
+    next_workouts = NextWorkoutSerializer(many=True)
+    cycle_status = CycleStatusSerializer()
+
+
+class ScheduleDaySerializer(serializers.Serializer):
+    day_id = serializers.CharField()
+    day = serializers.CharField()
+    date = serializers.CharField()
+    load = serializers.CharField()
+    sessions = ScheduleSessionSerializer(many=True)
+
+
+class ScheduleResponseSerializer(serializers.Serializer):
+    days = ScheduleDaySerializer(many=True)
+
+
+class WorkoutDaySerializer(serializers.Serializer):
+    id = serializers.CharField()
+    month = serializers.CharField()
+    day = serializers.CharField()
+    label = serializers.CharField()
+
+
+class WorkoutFilterSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    label = serializers.CharField()
+
+
+class WorkoutCatalogSerializer(serializers.Serializer):
+    days = WorkoutDaySerializer(many=True)
+    filters = WorkoutFilterSerializer(many=True)
+    workouts = WorkoutSerializer(many=True)

@@ -74,6 +74,11 @@
   background: transparent;
 }
 
+.inputShellError {
+  border-color: #ff6b73;
+  box-shadow: 0 0 0 1px rgba(255, 107, 115, 0.22);
+}
+
 .inputIcon {
   width: 24px;
   height: 24px;
@@ -103,6 +108,12 @@
 
 .inputShell input::placeholder {
   color: rgba(255, 255, 255, 0.72);
+}
+
+.fieldError {
+  color: #ff9ea4;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .primaryButton,
@@ -209,9 +220,22 @@
 
 .status {
   margin: 12px 0 0;
-  color: #ffffff;
   font-size: 13px;
   line-height: 1.5;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.statusError {
+  color: #ffd7da;
+  background: rgba(217, 10, 20, 0.18);
+  border: 1px solid rgba(255, 107, 115, 0.26);
+}
+
+.statusSuccess {
+  color: #effff2;
+  background: rgba(61, 148, 82, 0.2);
+  border: 1px solid rgba(116, 226, 145, 0.24);
 }
 
 @media (max-width: 768px) {
