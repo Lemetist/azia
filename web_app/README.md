@@ -10,6 +10,35 @@
 - docker-compose.prod.yml — production stack
 - .env.prod.example — шаблон production-переменных
 
+## Локальный запуск
+
+Для локального тестирования удобнее запускать frontend и backend одной командой:
+
+```bash
+make local
+```
+
+Если `make` не нужен, можно запустить напрямую:
+
+```bash
+./scripts/run-local.sh
+```
+
+Что делает скрипт:
+
+- создает `frontend/.env.local` из шаблона, если файла еще нет
+- при необходимости ставит frontend-зависимости через `npm ci`
+- применяет Django-миграции
+- поднимает Django на `127.0.0.1:8000`
+- поднимает Next.js на `127.0.0.1:3000`
+- завершает оба процесса по `Ctrl+C`
+
+Проверка проекта перед ручным тестом:
+
+```bash
+make check
+```
+
 ## Production запуск
 
 1. Создайте файл .env.prod на основе .env.prod.example.
