@@ -1,13 +1,13 @@
 /** @type {import('next').NextConfig} */
-const apiProxyTarget = process.env.API_PROXY_TARGET || 'http://127.0.0.1:8000';
+const apiProxyTarget = (process.env.API_PROXY_TARGET || "http://127.0.0.1:8000").replace(/\/$/, "");
 
 const nextConfig = {
-  output: 'standalone',
+  output: "standalone",
   poweredByHeader: false,
   async rewrites() {
     return [
       {
-        source: '/api/:path*',
+        source: "/api/:path*",
         destination: `${apiProxyTarget}/api/:path*`,
       },
     ];

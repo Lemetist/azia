@@ -1,8 +1,9 @@
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
-from .models import Coach, ScheduleSlot, Workout, WorkoutPhase
+from .models import Coach, ScheduleSlot, UserProfile, Workout, WorkoutPhase
 from .tokens import (
     get_user_from_refresh_token,
     issue_access_token,
@@ -58,16 +59,68 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    sex_label = serializers.CharField(source="get_sex_display", read_only=True)
+    goal_label = serializers.CharField(source="get_goal_display", read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            "sex",
+            "sex_label",
+            "age",
+            "height_cm",
+            "weight_kg",
+            "goal",
+            "goal_label",
+            "nutrition_recommendations",
+            "daily_workout",
+        ]
+
+
+class UserProfileUpsertSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ["sex", "age", "height_cm", "weight_kg", "goal"]
+        extra_kwargs = {
+            "age": {"min_value": 12, "max_value": 90},
+            "height_cm": {"min_value": 120, "max_value": 230},
+            "weight_kg": {"min_value": 35, "max_value": 250},
+        }
+
+    def create(self, validated_data):
+        profile = UserProfile(user=self.context["request"].user, **validated_data)
+        profile.regenerate_plan()
+        profile.save()
+        return profile
+
+    def update(self, instance, validated_data):
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        instance.regenerate_plan()
+        instance.save()
+        return instance
+
+
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
+    profile = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["id", "username", "email", "full_name"]
+        fields = ["id", "username", "email", "full_name", "profile"]
 
     @extend_schema_field(str)
     def get_full_name(self, obj):
         return obj.get_full_name().strip()
+
+    @extend_schema_field(UserProfileSerializer)
+    def get_profile(self, obj):
+        try:
+            profile = obj.profile
+        except ObjectDoesNotExist:
+            return None
+        return UserProfileSerializer(profile).data
 
 
 class CustomTokenObtainPairSerializer(serializers.Serializer):
@@ -219,11 +272,31 @@ class CycleStatusSerializer(serializers.Serializer):
     readiness = serializers.CharField()
 
 
+class NutritionRecommendationSerializer(serializers.Serializer):
+    label = serializers.CharField()
+    value = serializers.CharField()
+    note = serializers.CharField()
+
+
+class DailyWorkoutSerializer(serializers.Serializer):
+    title = serializers.CharField()
+    focus = serializers.CharField()
+    duration = serializers.CharField()
+    intensity = serializers.CharField()
+    blocks = serializers.ListField(child=serializers.CharField())
+
+
+class PersonalPlanSerializer(serializers.Serializer):
+    nutrition_recommendations = NutritionRecommendationSerializer(many=True)
+    daily_workout = DailyWorkoutSerializer()
+
+
 class DashboardSummarySerializer(serializers.Serializer):
     stats = OverviewStatSerializer(many=True)
     recovery_signals = RecoverySignalSerializer(many=True)
     next_workouts = NextWorkoutSerializer(many=True)
     cycle_status = CycleStatusSerializer()
+    personal_plan = PersonalPlanSerializer(allow_null=True, required=False)
 
 
 class ScheduleDaySerializer(serializers.Serializer):

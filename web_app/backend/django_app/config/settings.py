@@ -1,12 +1,19 @@
 import os
-from pathlib import Path
 from datetime import timedelta
-from dotenv import load_dotenv
+from importlib.util import find_spec
+from pathlib import Path
+
+try:
+    from dotenv import load_dotenv
+except ModuleNotFoundError:
+    load_dotenv = None
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
-load_dotenv(BASE_DIR / "config" / ".env")
+
+if load_dotenv is not None:
+    load_dotenv(BASE_DIR / ".env")
+    load_dotenv(BASE_DIR / "config" / ".env")
 
 
 def env_bool(name: str, default: bool) -> bool:
@@ -15,6 +22,13 @@ def env_bool(name: str, default: bool) -> bool:
 
 def env_list(name: str, default: str = "") -> list[str]:
     return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
+
+
+def module_available(module_path: str) -> bool:
+    try:
+        return find_spec(module_path) is not None
+    except ModuleNotFoundError:
+        return False
 
 
 DEBUG = env_bool("DJANGO_DEBUG", True)
@@ -34,10 +48,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "rest_framework_simplejwt.token_blacklist",
     "api",
-    "drf_spectacular"
 ]
+
+if module_available("rest_framework_simplejwt.token_blacklist"):
+    INSTALLED_APPS.append("rest_framework_simplejwt.token_blacklist")
+
+if module_available("drf_spectacular"):
+    INSTALLED_APPS.append("drf_spectacular")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -67,26 +85,40 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
-db_engine = os.getenv("DB_ENGINE", "django.db.backends.postgresql")
+default_sqlite_name = str(BASE_DIR / "db.sqlite3")
+configured_db_engine = os.getenv("DB_ENGINE")
+db_host = os.getenv("DB_HOST", "").strip()
+db_name = os.getenv("DB_NAME", "").strip()
+db_user = os.getenv("DB_USER", "").strip()
+db_password = os.getenv("DB_PASSWORD", "").strip()
+db_port = os.getenv("DB_PORT", "5432").strip()
+
+if configured_db_engine:
+    db_engine = configured_db_engine
+elif db_host:
+    db_engine = "django.db.backends.postgresql"
+else:
+    db_engine = "django.db.backends.sqlite3"
 
 if db_engine == "django.db.backends.sqlite3":
     DATABASES = {
         "default": {
             "ENGINE": db_engine,
-            "NAME": os.getenv("DB_NAME", BASE_DIR / "db.sqlite3"),
+            "NAME": db_name or default_sqlite_name,
         }
     }
 else:
     DATABASES = {
         "default": {
             "ENGINE": db_engine,
-            "NAME": os.getenv("DB_NAME", "app"),
-            "USER": os.getenv("DB_USER", "app"),
-            "PASSWORD": os.getenv("DB_PASSWORD", "app"),
-            "HOST": os.getenv("DB_HOST", "localhost"),
-            "PORT": os.getenv("DB_PORT", "5432"),
+            "NAME": db_name or "app",
+            "USER": db_user or "app",
+            "PASSWORD": db_password,
+            "HOST": db_host or "127.0.0.1",
+            "PORT": db_port or "5432",
         }
     }
+
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
@@ -112,19 +144,21 @@ SECURE_HSTS_PRELOAD = env_bool("DJANGO_SECURE_HSTS_PRELOAD", not DEBUG)
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "api.authentication.BearerTokenAuthentication",
     ],
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
 }
 
+if module_available("drf_spectacular"):
+    REST_FRAMEWORK["DEFAULT_SCHEMA_CLASS"] = "drf_spectacular.openapi.AutoSchema"
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "My API",
     "DESCRIPTION": "API documentation",
     "VERSION": "1.0.0",
-    # Include bearer auth scheme and set it as a global security requirement
+ 
     "SERVE_INCLUDE_SCHEMA": False,
     "SECURITY": [{"bearerAuth": []}],
     "COMPONENTS": {

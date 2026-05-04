@@ -41,8 +41,8 @@ make check
 
 ## Production запуск
 
-1. Создайте файл .env.prod на основе .env.prod.example.
-2. Проверьте домены в DJANGO_ALLOWED_HOSTS и DJANGO_CSRF_TRUSTED_ORIGINS.
+1. Создайте файл `.env.prod` на основе `.env.prod.example`.
+2. Проверьте `DJANGO_ALLOWED_HOSTS` и `DJANGO_CSRF_TRUSTED_ORIGINS`.
 3. Запустите стек:
 
 ```bash
@@ -58,7 +58,9 @@ curl http://localhost/health/
 
 ## Что делает production-контур
 
+- `db` поднимает PostgreSQL и хранит данные в named volume
 - backend запускается через gunicorn
 - при старте автоматически применяются миграции и collectstatic
-- nginx проксирует / в Next.js, /api и /admin в Django
+- frontend проксирует `/api/*` в backend внутри docker-сети
+- nginx проксирует `/` в Next.js, `/api` и `/admin` в Django
 - статические файлы Django раздаются напрямую из nginx

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 import {
+  type RegistrationPayload,
   loginWithCredentials,
   registerWithCredentials,
 } from "../../lib/session";
@@ -21,7 +22,7 @@ export type Credentials = {
 type AuthCardProps = {
   mode: AuthMode;
   onLogin?(credentials: Credentials): void | Promise<void>;
-  onRegister?(credentials: Credentials): void | Promise<void>;
+  onRegister?(credentials: RegistrationPayload): void | Promise<void>;
 };
 
 type AuthFieldErrors = {
@@ -37,6 +38,7 @@ type ApiLikeError = Error & {
 };
 
 const DASHBOARD_PATH = "/overview";
+const ASSESSMENT_PATH = "/assessment";
 
 function MailIcon() {
   return (
@@ -220,7 +222,12 @@ function getAuthFieldErrors(error: unknown, mode: AuthMode): AuthFieldErrors {
     nextErrors.form = error.message;
   }
 
-  if (!nextErrors.form && !nextErrors.email && !nextErrors.password && !nextErrors.fullName) {
+  if (
+    !nextErrors.form &&
+    !nextErrors.email &&
+    !nextErrors.password &&
+    !nextErrors.fullName
+  ) {
     nextErrors.form = "Не удалось выполнить операцию. Попробуйте еще раз.";
   }
 
@@ -261,27 +268,31 @@ export default function AuthCard({
     }
 
     try {
+      let nextUser;
+
       if (mode === "login") {
         if (onLogin) {
           await onLogin(payload);
         } else {
-          await loginWithCredentials(payload.email, payload.password);
+          nextUser = await loginWithCredentials(payload.email, payload.password);
         }
         setStatus("Успешный вход. Перенаправляем...");
       } else {
+        const registrationPayload: RegistrationPayload = {
+          fullName: payload.fullName || "",
+          email: payload.email,
+          password: payload.password,
+        };
+
         if (onRegister) {
-          await onRegister(payload);
+          await onRegister(registrationPayload);
         } else {
-          await registerWithCredentials(
-            payload.fullName || "",
-            payload.email,
-            payload.password
-          );
+          nextUser = await registerWithCredentials(registrationPayload);
         }
         setStatus("Аккаунт создан. Перенаправляем...");
       }
 
-      router.push(DASHBOARD_PATH);
+      router.push(nextUser?.profile ? DASHBOARD_PATH : ASSESSMENT_PATH);
       router.refresh();
     } catch (error) {
       const nextErrors = getAuthFieldErrors(error, mode);

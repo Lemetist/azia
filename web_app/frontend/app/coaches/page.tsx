@@ -1,5 +1,7 @@
+import Link from "next/link";
+
 import DashboardShell from "../../components/dashboard/DashboardShell";
-import { coaches } from "../../components/dashboard/dashboard-data";
+import { coachFormats, coaches } from "../../components/dashboard/dashboard-data";
 import styles from "../../components/dashboard/dashboard-page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -9,11 +11,11 @@ export default function CoachesPage() {
     <DashboardShell
       active="coaches"
       title="Тренеры"
-      subtitle="Программы под руководством экспертов по силе, плаванию и бегу с профилями, удобными для просмотра на десктопе."
+      subtitle="Профили с понятной специализацией, доступностью и форматом работы, чтобы выбор тренера был предметным, а не декоративным."
       actions={
-        <button className={styles.primaryAction} type="button">
-          Подобрать тренера
-        </button>
+        <Link className={styles.primaryAction} href="#coach-formats">
+          Как выбрать тренера
+        </Link>
       }
     >
       <section className={styles.stack}>
@@ -29,36 +31,37 @@ export default function CoachesPage() {
               <div className={styles.coachContent}>
                 <h3>{coach.name}</h3>
                 <p>{coach.focus}</p>
+                <div className={styles.coachMeta}>
+                  <span className={styles.miniTag}>{coach.speciality}</span>
+                  <span className={styles.miniTag}>{coach.experience}</span>
+                  <span className={styles.statusTag}>{coach.availability}</span>
+                </div>
               </div>
             </article>
           ))}
         </div>
 
         <div className={styles.doubleGrid}>
-          <article className={`${styles.panel} ${styles.panelMedium}`}>
-            <h3 className={styles.sectionTitle}>Формат работы</h3>
-            <div className={styles.sessionList}>
-              <div className={styles.sessionCard}>
-                <strong>Индивидуальные сессии</strong>
-                <p className={styles.smallMuted}>Детальная корректировка техники и прогрессия нагрузки.</p>
-              </div>
-              <div className={styles.sessionCard}>
-                <strong>Занятия в малых группах</strong>
-                <p className={styles.smallMuted}>Соревновательная атмосфера и структурированная программа.</p>
-              </div>
-              <div className={styles.sessionCard}>
-                <strong>Удаленные чек-ины</strong>
-                <p className={styles.smallMuted}>Еженедельные заметки, разбор данных трекера и обновление плана.</p>
-              </div>
+          <article className={`${styles.panel} ${styles.panelMedium}`} id="coach-formats">
+            <h3 className={styles.sectionTitle}>Как строится работа</h3>
+            <div className={styles.benefitsList}>
+              {coachFormats.map((item) => (
+                <div className={styles.benefitItem} key={item.title}>
+                  <strong>{item.title}</strong>
+                  <p>{item.description}</p>
+                </div>
+              ))}
             </div>
           </article>
 
           <article className={styles.mediaPanel}>
             <div className={styles.mediaContent}>
-              <p className={styles.tag}>Выбор тренера</p>
-              <h3>Сначала техника, потом интенсивность.</h3>
+              <p className={styles.tag}>Логика подбора</p>
+              <h3>Сначала цель и ритм недели, потом уже фамилия тренера.</h3>
               <p>
-                Любая программа начинается с качества движения, а уже потом с роста объема.
+                Если фокус на силе и технике, нужен плотный контакт с Marcus. Если
+                задача в выносливости и восстановлении, логичнее входить через Nina
+                или Arseniy.
               </p>
             </div>
           </article>

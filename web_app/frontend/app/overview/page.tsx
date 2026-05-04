@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import DashboardShell from "../../components/dashboard/DashboardShell";
 import { overviewActions } from "../../components/dashboard/dashboard-data";
-import { fetchSessionJson } from "../../lib/session";
+import { type DailyWorkout, type NutritionRecommendation, fetchSessionJson } from "../../lib/session";
 import styles from "../../components/dashboard/dashboard-page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -40,6 +40,10 @@ type DashboardSummary = {
     slots_filled: string;
     readiness: string;
   };
+  personal_plan?: {
+    nutrition_recommendations: NutritionRecommendation[];
+    daily_workout: DailyWorkout;
+  } | null;
 };
 
 export default function OverviewPage() {
@@ -88,6 +92,7 @@ export default function OverviewPage() {
   const recoverySignals = summary?.recovery_signals ?? [];
   const nextWorkouts = summary?.next_workouts ?? [];
   const cycleStatus = summary?.cycle_status;
+  const personalPlan = summary?.personal_plan;
 
   return (
     <DashboardShell
@@ -156,6 +161,45 @@ export default function OverviewPage() {
             )
           )}
         </div>
+
+        {personalPlan ? (
+          <div className={styles.doubleGrid}>
+            <article className={`${styles.panel} ${styles.panelMedium}`}>
+              <h3 className={styles.sectionTitle}>Питание на день</h3>
+              <div className={styles.sessionList}>
+                {personalPlan.nutrition_recommendations.map((item) => (
+                  <div className={styles.sessionCard} key={item.label}>
+                    <div className={styles.sessionHead}>
+                      <strong>{item.label}</strong>
+                      <span className={styles.statusTag}>{item.value}</span>
+                    </div>
+                    <p className={styles.sessionMeta}>{item.note}</p>
+                  </div>
+                ))}
+              </div>
+            </article>
+
+            <article className={`${styles.panel} ${styles.panelMedium}`}>
+              <h3 className={styles.sectionTitle}>Тренировка сегодня</h3>
+              <div className={styles.sessionCard}>
+                <div className={styles.sessionHead}>
+                  <strong>{personalPlan.daily_workout.title}</strong>
+                  <span className={styles.tag}>{personalPlan.daily_workout.intensity}</span>
+                </div>
+                <p className={styles.sessionMeta}>
+                  {personalPlan.daily_workout.duration} · {personalPlan.daily_workout.focus}
+                </p>
+              </div>
+              <div className={styles.sessionList}>
+                {personalPlan.daily_workout.blocks.map((block) => (
+                  <div className={styles.timelineCard} key={block}>
+                    <p className={styles.listValue}>{block}</p>
+                  </div>
+                ))}
+              </div>
+            </article>
+          </div>
+        ) : null}
 
         <div className={styles.doubleGrid}>
           <article className={`${styles.panel} ${styles.panelMedium}`}>

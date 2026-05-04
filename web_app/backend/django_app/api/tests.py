@@ -14,6 +14,15 @@ class AuthApiTests(APITestCase):
             password="strongpass123",
         )
 
+    def profile_payload(self):
+        return {
+            "sex": "male",
+            "age": 32,
+            "height_cm": "182.0",
+            "weight_kg": "84.0",
+            "goal": "recomposition",
+        }
+
     def test_register_accepts_post_without_trailing_slash(self):
         response = self.client.post(
             "/api/auth/register",
@@ -62,6 +71,53 @@ class AuthApiTests(APITestCase):
         self.assertEqual(user.email, "newuser@example.com")
         self.assertEqual(user.first_name, "Ivan")
         self.assertEqual(user.last_name, "Petrov")
+        self.assertFalse(hasattr(user, "profile"))
+
+    def test_profile_assessment_creates_profile_and_plan(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.put("/api/auth/profile/", self.profile_payload(), format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["goal"], "recomposition")
+        self.assertEqual(response.data["goal_label"], "Рекомпозиция")
+        self.assertEqual(response.data["nutrition_recommendations"][0]["label"], "Калории и темп")
+        self.assertGreaterEqual(len(response.data["nutrition_recommendations"]), 5)
+        self.assertEqual(response.data["daily_workout"]["title"], "Сила + короткий метаболический блок")
+
+    def test_profile_assessment_requires_valid_payload(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post(
+            "/api/auth/profile/",
+            {
+                "sex": "male",
+                "age": 8,
+                "height_cm": "80.0",
+                "weight_kg": "20.0",
+                "goal": "recomposition",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        response = self.client.put(
+            "/api/auth/profile/",
+            {
+                "sex": "male",
+                "age": 8,
+                "height_cm": "80.0",
+                "weight_kg": "20.0",
+                "goal": "recomposition",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("age", response.data)
+        self.assertIn("height_cm", response.data)
+        self.assertIn("weight_kg", response.data)
 
     def test_register_rejects_duplicate_email(self):
         response = self.client.post(
@@ -93,6 +149,7 @@ class AuthApiTests(APITestCase):
                 "username": "testuser@example.com",
                 "email": "testuser@example.com",
                 "full_name": "Ivan Petrov",
+                "profile": None,
             },
         )
 
@@ -141,6 +198,7 @@ class AuthApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["email"], "testuser@example.com")
         self.assertEqual(response.data["full_name"], "Ivan Petrov")
+        self.assertIsNone(response.data["profile"])
 
     def test_refresh_endpoint_returns_new_access_token(self):
         token_response = self.client.post(
@@ -177,6 +235,29 @@ class AuthApiTests(APITestCase):
         self.assertEqual(len(response.data["stats"]), 3)
         self.assertGreaterEqual(len(response.data["next_workouts"]), 1)
         self.assertEqual(response.data["cycle_status"]["week"], "Неделя 12 из 16")
+        self.assertIsNone(response.data["personal_plan"])
+
+    def test_dashboard_summary_returns_personal_plan_for_profile(self):
+        user = User.objects.create_user(
+            username="profile@example.com",
+            email="profile@example.com",
+            password="strongpass123",
+        )
+        self.client.force_authenticate(user=user)
+        profile_response = self.client.put("/api/auth/profile/", self.profile_payload(), format="json")
+        self.assertEqual(profile_response.status_code, status.HTTP_201_CREATED)
+
+        self.client.force_authenticate(user=user)
+
+        response = self.client.get("/api/dashboard/summary/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["cycle_status"]["week"], "Персональный день")
+        self.assertEqual(
+            response.data["personal_plan"]["daily_workout"]["title"],
+            "Сила + короткий метаболический блок",
+        )
+        self.assertEqual(response.data["personal_plan"]["nutrition_recommendations"][0]["label"], "Калории и темп")
 
     def test_schedule_returns_grouped_days(self):
         self.client.force_authenticate(user=self.user)

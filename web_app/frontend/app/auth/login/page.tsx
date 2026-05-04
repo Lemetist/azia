@@ -2,9 +2,9 @@ import AuthCard from "../../../components/auth/AuthCard";
 import styles from "../auth.module.css";
 
 export const metadata = {
-  title: "Вход — FIT CENTER",
+  title: "Вход — Primal Training",
   description:
-    "Авторизуйтесь в личном кабинете FIT CENTER, чтобы получать персональные тренировки и рекомендации тренеров.",
+    "Авторизуйтесь в кабинете Primal Training, чтобы вернуться к расписанию, тренировкам и прогрессу.",
 };
 
 export default function LoginPage() {

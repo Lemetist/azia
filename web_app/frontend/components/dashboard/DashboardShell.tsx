@@ -43,6 +43,11 @@ export default function DashboardShell({
           return;
         }
 
+        if (!currentUser.profile) {
+          router.replace("/assessment");
+          return;
+        }
+
         setUser(currentUser);
         setSessionReady(true);
       } catch {

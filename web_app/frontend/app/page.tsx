@@ -1,81 +1,103 @@
-import Link from 'next/link';
+import Link from "next/link";
 
-import styles from './page.module.css';
+import styles from "./page.module.css";
 
 const navigationLinks = [
-  { label: 'Программы', href: '#programs' },
-  { label: 'Преимущества', href: '#advantages' },
-  { label: 'Сообщество', href: '#community' },
+  { label: "Треки", href: "#tracks" },
+  { label: "Платформа", href: "#workspace" },
+  { label: "Маршрут", href: "#journey" },
+];
+
+const heroMetrics = [
+  { value: "12+", label: "структурированных циклов" },
+  { value: "5", label: "тренерских специализаций" },
+  { value: "91%", label: "средняя посещаемость" },
 ];
 
 const streamDetails = [
-  { label: 'Фокус', value: 'Strength + Engine' },
-  { label: 'Тренер', value: 'Marcus Bell' },
-  { label: 'Старт', value: '18 марта' },
-];
-
-const narrativeTags = ['Сила', 'Функциональность', 'Контроль прогрессии'];
-
-const programCards = [
-  {
-    title: 'Strength Base',
-    duration: '8 недель',
-    description: 'Штанга, техника, прогрессия нагрузок и работа на силу без хаоса.',
-    cta: 'Открыть план',
-  },
-  {
-    title: 'Fight Conditioning',
-    duration: '6 недель',
-    description: 'Интервалы, темп и метаболическая мощность для плотного ритма недели.',
-    cta: 'Смотреть блок',
-  },
-  {
-    title: 'Hybrid Engine',
-    duration: '10 недель',
-    description: 'Сочетание силы, кардио и восстановления для стабильного прогресса.',
-    cta: 'Изучить цикл',
-  },
-];
-
-const metrics = [
-  { value: '12+', label: 'Программ подготовки' },
-  { value: '5', label: 'Тренерских направлений' },
-  { value: '24/7', label: 'Поддержка в чате' },
-  { value: '2026', label: 'Новый сезон открыт' },
-];
-
-const featureCards = [
-  {
-    title: 'Сильная система',
-    description:
-      'Каждый цикл собирается из нагрузки, восстановления и контроля техники, а не из случайных тренировок.',
-  },
-  {
-    title: 'Живой ритм',
-    description:
-      'Тренер, расписание и персональные блоки связаны в один поток, чтобы не терять импульс между сессиями.',
-  },
-  {
-    title: 'Прогресс на цифрах',
-    description:
-      'Следим за силой, объемом, посещаемостью и восстановлением, чтобы рост был измеримым, а не на ощущениях.',
-  },
+  { label: "Фокус", value: "Сила + выносливость" },
+  { label: "Тренер", value: "Marcus Bell" },
+  { label: "Следующий слот", value: "18:30 сегодня" },
 ];
 
 const weeklyFlow = [
-  { day: 'Пн', title: 'Strength forge', meta: '18:30 · Нижняя часть' },
-  { day: 'Ср', title: 'Fight conditioning', meta: '19:00 · Интервалы' },
-  { day: 'Сб', title: 'Mobility reset', meta: '10:15 · Recovery' },
+  { day: "Пн", title: "Strength Forge", meta: "Низ тела · 18:30", href: "/schedule" },
+  { day: "Ср", title: "Fight Conditioning", meta: "Интервалы · 19:00", href: "/workouts" },
+  { day: "Сб", title: "Mobility Reset", meta: "Recovery · 10:15", href: "/progress" },
+];
+
+const programCards = [
+  {
+    title: "Strength Base",
+    duration: "8 недель",
+    description: "База силы, техника со штангой и постепенная прогрессия без перегруза.",
+    href: "/assessment",
+  },
+  {
+    title: "Hybrid Engine",
+    duration: "10 недель",
+    description: "Силовые блоки, кардио и восстановление в едином недельном ритме.",
+    href: "/workouts",
+  },
+  {
+    title: "Fight Conditioning",
+    duration: "6 недель",
+    description: "Плотная кондиционная работа, интервалы и взрывная мощность.",
+    href: "/coaches",
+  },
+];
+
+const workspaceCards = [
+  {
+    title: "Workouts",
+    eyebrow: "Мобильный сценарий",
+    description: "Подборка тренировок, длительность, фазы сессии и быстрый запуск из одного экрана.",
+    href: "/workouts",
+  },
+  {
+    title: "Schedule",
+    eyebrow: "Десктопный контроль",
+    description: "Слоты, загрузка недели и быстрые записи на занятия без хаоса в календаре.",
+    href: "/schedule",
+  },
+  {
+    title: "Progress",
+    eyebrow: "Метрики",
+    description: "Тренировочный объем, цели и восстановление в аналитическом формате.",
+    href: "/progress",
+  },
+];
+
+const journeySteps = [
+  {
+    index: "01",
+    title: "Выбери цель",
+    description: "Короткий onboarding собирает задачу: сила, рекомпозиция, выносливость или возврат в форму.",
+  },
+  {
+    index: "02",
+    title: "Получай маршрут",
+    description: "После оценки открывается релевантный сценарий: тренировки, расписание и тренерский контекст.",
+  },
+  {
+    index: "03",
+    title: "Отслеживай прогресс",
+    description: "Платформа связывает посещаемость, нагрузку и восстановление, чтобы курс не распадался через неделю.",
+  },
 ];
 
 export default function HomePage() {
   return (
     <main className={styles.page}>
       <section className={styles.hero}>
-        <div className={styles.shell}>
+        <div className={`${styles.shell} ${styles.heroShell}`}>
           <header className={styles.header}>
             <Link className={styles.brand} href="/" aria-label="Primal Training">
-              PT
+              <span className={styles.brandMark}>PT</span>
+              <span className={styles.brandText}>
+                <strong>Primal Training</strong>
+                <span>System-led fitness</span>
+              </span>
             </Link>
 
             <nav className={styles.navigation} aria-label="Основная навигация">
@@ -96,48 +118,73 @@ export default function HomePage() {
             </div>
           </header>
 
-          <div className={styles.heroIntro}>
-            <p className={styles.eyebrow}>Primal training system</p>
-            <div className={styles.statementBar}>
-              <span>HARD WORK PAYS.</span>
-            </div>
-          </div>
-
           <div className={styles.heroGrid}>
             <div className={styles.heroCopy}>
+              <p className={styles.eyebrow}>Primal training system</p>
               <h1 className={styles.heroTitle}>
-                Пробуди зверя внутри. Стань крепче стали.
+                Сильный фитнес-клуб с маршрутом, а не набором случайных экранов.
               </h1>
               <p className={styles.heroLead}>
-                Силовые циклы, функциональная подготовка и понятная прогрессия в одном
-                ритме. Без лишнего шума, но с характером.
+                Персональный onboarding, понятные тренировочные циклы, расписание и
+                аналитика прогресса собраны в одну систему. Вход в продукт начинается
+                без лишнего шума и без потерянных шагов.
               </p>
 
               <div className={styles.heroActions}>
                 <Link className={styles.primaryButton} href="/assessment">
-                  Начать цикл
+                  Начать assessment
                 </Link>
-                <a className={styles.secondaryButton} href="#weekly-flow">
-                  Посмотреть расписание
-                </a>
+                <Link className={styles.secondaryButton} href="/workouts">
+                  Смотреть workouts
+                </Link>
+              </div>
+
+              <div className={styles.metricRow}>
+                {heroMetrics.map((item) => (
+                  <article key={item.label} className={styles.metricChip}>
+                    <strong>{item.value}</strong>
+                    <span>{item.label}</span>
+                  </article>
+                ))}
               </div>
             </div>
 
-            <aside className={styles.streamCard}>
-              <p className={styles.cardEyebrow}>Текущий поток</p>
-              <h2 className={styles.streamTitle}>Spring Iron Block</h2>
-              <p className={styles.streamLead}>
-                4 силовые сессии, 2 интервальные работы, 1 восстановительное окно и
-                ревью по итогам недели.
-              </p>
+            <aside className={styles.heroPanel}>
+              <div className={styles.panelTop}>
+                <p className={styles.panelEyebrow}>Текущий блок</p>
+                <h2 className={styles.panelTitle}>Spring Iron Cycle</h2>
+                <p className={styles.panelLead}>
+                  4 силовые сессии, 2 кондиционных блока и окно восстановления в конце
+                  недели.
+                </p>
+              </div>
 
-              <div className={styles.streamStats}>
+              <div className={styles.panelStats}>
                 {streamDetails.map((item) => (
-                  <div key={item.label} className={styles.streamRow}>
+                  <div key={item.label} className={styles.panelRow}>
                     <span>{item.label}</span>
                     <strong>{item.value}</strong>
                   </div>
                 ))}
+              </div>
+
+              <div className={styles.panelFlow}>
+                <div className={styles.panelFlowHead}>
+                  <p>Живой ритм недели</p>
+                  <Link href="/schedule">Открыть</Link>
+                </div>
+
+                <div className={styles.flowList}>
+                  {weeklyFlow.map((item) => (
+                    <Link key={item.day} className={styles.flowCard} href={item.href}>
+                      <span className={styles.flowDay}>{item.day}</span>
+                      <span className={styles.flowCopy}>
+                        <strong>{item.title}</strong>
+                        <span>{item.meta}</span>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
               </div>
             </aside>
           </div>
@@ -146,138 +193,128 @@ export default function HomePage() {
 
       <section className={`${styles.storySection} ${styles.shell}`}>
         <article className={styles.storyCard}>
-          <p className={styles.sectionEyebrow}>Our vision</p>
+          <p className={styles.sectionEyebrow}>Подход</p>
           <h2 className={styles.sectionTitle}>
-            Тренировки, которые собирают дисциплину, а не только усталость.
+            Каждая часть продукта продолжает предыдущую, а не существует отдельно.
           </h2>
           <p className={styles.sectionText}>
-            Мы строим маршрут от первой сессии до стабильного результата через базовую
-            силу, координацию, функциональную выносливость и понятную нагрузку на каждую
-            неделю.
+            Сначала пользователь понимает логику клуба, затем выбирает цель, получает
+            маршрут и переходит в рабочие разделы кабинета. Так onboarding, тренировки
+            и кабинет ощущаются одной системой.
           </p>
-
-          <div className={styles.tagRow}>
-            {narrativeTags.map((tag) => (
-              <span key={tag} className={styles.tag}>
-                {tag}
-              </span>
-            ))}
-          </div>
         </article>
 
         <div className={styles.storyAside}>
-          <span className={styles.floatingPill}>Coach-led</span>
-          <div className={styles.storyQuote}>
-            Режим, в котором каждая неделя ощущается как следующая ступень, а не повтор
-            вчерашнего дня.
-          </div>
+          <span className={styles.floatingPill}>Coach-led + data-aware</span>
+          <p className={styles.storyQuote}>
+            Каждый следующий экран продолжает сценарий пользователя, а не обрывает его.
+          </p>
         </div>
       </section>
 
-      <section className={`${styles.programSection} ${styles.shell}`} id="programs">
-        <div className={styles.programVisual} aria-hidden="true" />
+      <section className={`${styles.tracksSection} ${styles.shell}`} id="tracks">
+        <div className={styles.sectionIntro}>
+          <div>
+            <p className={styles.sectionEyebrowDark}>Треки подготовки</p>
+            <h2 className={`${styles.sectionTitle} ${styles.darkTitle}`}>
+              Разные цели, один стандарт качества и один визуальный язык.
+            </h2>
+          </div>
+          <p className={styles.sectionLead}>
+            Программы связаны с реальными разделами приложения, поэтому пользователь
+            может перейти от обещания к действию в один клик.
+          </p>
+        </div>
 
-        <article className={styles.programContent}>
-          <p className={styles.sectionEyebrowMuted}>Program tracks</p>
-          <h2 className={styles.sectionTitle}>
-            Разные сценарии подготовки, но один уровень качества.
-          </h2>
+        <div className={styles.programGrid}>
+          {programCards.map((item) => (
+            <article key={item.title} className={styles.programCard}>
+              <div className={styles.programHead}>
+                <h3>{item.title}</h3>
+                <span>{item.duration}</span>
+              </div>
+              <p>{item.description}</p>
+              <Link className={styles.programButton} href={item.href}>
+                Открыть
+              </Link>
+            </article>
+          ))}
+        </div>
+      </section>
 
-          <div className={styles.programGrid}>
-            {programCards.map((item) => (
-              <article key={item.title} className={styles.programCard}>
-                <div className={styles.programHead}>
-                  <h3>{item.title}</h3>
-                  <span>{item.duration}</span>
-                </div>
+      <section className={styles.workspaceSection} id="workspace">
+        <div className={styles.shell}>
+          <div className={styles.sectionIntro}>
+            <div>
+              <p className={styles.sectionEyebrow}>Платформа</p>
+              <h2 className={styles.sectionTitle}>
+                Основные разделы теперь собраны в ясную продуктовую витрину.
+              </h2>
+            </div>
+            <p className={`${styles.sectionLead} ${styles.sectionLeadLight}`}>
+              Вместо абстрактного лендинга пользователь видит, какие сценарии уже
+              доступны: подбор тренировки, расписание и аналитика прогресса.
+            </p>
+          </div>
+
+          <div className={styles.workspaceGrid}>
+            {workspaceCards.map((item) => (
+              <article key={item.title} className={styles.workspaceCard}>
+                <p className={styles.cardEyebrow}>{item.eyebrow}</p>
+                <h3>{item.title}</h3>
                 <p>{item.description}</p>
-                <Link className={styles.programButton} href="/assessment">
-                  {item.cta}
+                <Link className={styles.inlineLink} href={item.href}>
+                  Перейти в раздел
                 </Link>
               </article>
             ))}
           </div>
-        </article>
-      </section>
-
-      <section className={styles.metricsSection} id="advantages">
-        <div className={styles.shell}>
-          <div className={styles.metricsIntro}>
-            <div>
-              <p className={styles.sectionEyebrowDark}>Почему это работает</p>
-              <h2 className={`${styles.sectionTitle} ${styles.darkTitle}`}>
-                Из этой идеи получилось нормальное ядро, а не просто красивый экран.
-              </h2>
-            </div>
-            <p className={styles.metricsLead}>
-              Я убрал пустой провал из середины макета и собрал связный лендинг: hero,
-              narrative-блоки, карточки программ, метрики и живой финальный CTA.
-            </p>
-          </div>
-
-          <div className={styles.metricGrid}>
-            {metrics.map((item) => (
-              <article key={item.label} className={styles.metricCard}>
-                <strong>{item.value}</strong>
-                <span>{item.label}</span>
-              </article>
-            ))}
-          </div>
-
-          <div className={styles.featureGrid}>
-            {featureCards.map((item) => (
-              <article key={item.title} className={styles.featureCard}>
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
-              </article>
-            ))}
-          </div>
         </div>
       </section>
 
-      <section className={`${styles.weeklySection} ${styles.shell}`} id="community">
-        <div className={styles.weeklyCopy}>
-          <p className={styles.sectionEyebrowDark}>Weekly flow</p>
-          <h2 className={`${styles.sectionTitle} ${styles.darkTitle}`} id="weekly-flow">
-            Неделя выглядит как система, а не набор случайных заходов в зал.
+      <section className={`${styles.journeySection} ${styles.shell}`} id="journey">
+        <div className={styles.journeyCopy}>
+          <p className={styles.sectionEyebrowDark}>Маршрут пользователя</p>
+          <h2 className={`${styles.sectionTitle} ${styles.darkTitle}`}>
+            От первого касания до регулярной тренировки путь стал короче и чище.
           </h2>
         </div>
 
-        <div className={styles.weeklyPanel}>
-          <div className={styles.flowList}>
-            {weeklyFlow.map((item) => (
-              <article key={item.day} className={styles.flowCard}>
-                <div className={styles.flowDay}>{item.day}</div>
+        <div className={styles.journeyPanel}>
+          <div className={styles.journeyList}>
+            {journeySteps.map((item) => (
+              <article key={item.index} className={styles.journeyCard}>
+                <span>{item.index}</span>
                 <div>
                   <h3>{item.title}</h3>
-                  <p>{item.meta}</p>
+                  <p>{item.description}</p>
                 </div>
               </article>
             ))}
           </div>
 
-          <div className={styles.weeklyCta}>
+          <div className={styles.ctaCard}>
             <p>
-              Открывай расписание, смотри мобильный сценарий тренировок и веди прогресс
-              в одном приложении.
+              Начните с короткой оценки цели, чтобы открыть релевантный сценарий:
+              тренировочный план, недельное расписание и трек прогресса.
             </p>
-            <div className={styles.weeklyActions}>
+            <div className={styles.ctaActions}>
               <Link className={styles.primaryButton} href="/assessment">
-                Открыть workouts
+                Открыть assessment
               </Link>
-              <a className={styles.secondaryButtonStrong} href="#advantages">
-                Смотреть прогресс
-              </a>
+              <Link className={styles.secondaryButtonStrong} href="/schedule">
+                Смотреть schedule
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
       <footer className={styles.footer}>
-        <div className={styles.footerInner}>
-          <p>Позвоните нам прямо сейчас</p>
-          <a href="tel:+70000000000">+Phone</a>
-          <span>© 2026</span>
+        <div className={`${styles.shell} ${styles.footerInner}`}>
+          <p>Primal Training</p>
+          <a href="tel:+70000000000">+7 000 000 00 00</a>
+          <span>Фитнес-платформа и кабинет клуба, 2026</span>
         </div>
       </footer>
     </main>

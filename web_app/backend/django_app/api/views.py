@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers, status
 from django.db.models import Prefetch
 from rest_framework.decorators import api_view, permission_classes
@@ -50,6 +51,8 @@ from .serializers import (
     WorkoutCatalogSerializer,
     WorkoutFilterSerializer,
     WorkoutSerializer,
+    UserProfileSerializer,
+    UserProfileUpsertSerializer,
     TokenObtainPairRequestSerializer,
     TokenPairResponseSerializer,
     TokenRefreshSerializer,
@@ -115,12 +118,49 @@ def me(request):
     return Response(serializer.data)
 
 
-def _build_dashboard_summary():
+@extend_schema(
+    request=UserProfileUpsertSerializer,
+    responses={200: UserProfileSerializer, 201: UserProfileSerializer},
+    description="Создать или обновить анкету пользователя и пересчитать персональный план.",
+)
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def profile_assessment(request):
+    profile = _get_user_profile(request.user)
+    serializer = UserProfileUpsertSerializer(
+        profile,
+        data=request.data,
+        context={"request": request},
+    )
+    serializer.is_valid(raise_exception=True)
+    saved_profile = serializer.save()
+    status_code = status.HTTP_200_OK if profile else status.HTTP_201_CREATED
+    return Response(UserProfileSerializer(saved_profile).data, status=status_code)
+
+
+def _get_user_profile(user):
+    try:
+        profile = user.profile
+    except ObjectDoesNotExist:
+        return None
+    profile.ensure_current_plan()
+    return profile
+
+
+def _build_dashboard_summary(user):
+    profile = _get_user_profile(user)
     slots = list(
         ScheduleSlot.objects.select_related("coach")
         .order_by("position")[:3]
     )
     workouts_count = Workout.objects.count()
+    personal_plan = None
+
+    if profile:
+        personal_plan = {
+            "nutrition_recommendations": profile.nutrition_recommendations,
+            "daily_workout": profile.daily_workout,
+        }
 
     next_workouts = [
         {
@@ -135,21 +175,21 @@ def _build_dashboard_summary():
     response = {
         "stats": [
             {
-                "label": "Тренировок в цикле",
-                "value": str(workouts_count * 3 + 3),
-                "change": "+3 за неделю",
+                "label": "Тренировка дня",
+                "value": personal_plan["daily_workout"]["duration"] if personal_plan else str(workouts_count * 3 + 3),
+                "change": personal_plan["daily_workout"]["intensity"] if personal_plan else "+3 за неделю",
                 "tone": "accent",
             },
             {
-                "label": "Готовность",
-                "value": "84%",
-                "change": "Стабильно",
+                "label": "Цель",
+                "value": profile.get_goal_display() if profile else "84%",
+                "change": "Анкета учтена" if profile else "Стабильно",
                 "tone": "neutral",
             },
             {
-                "label": "Посещаемость",
-                "value": "91%",
-                "change": "Выше цели",
+                "label": "Питание",
+                "value": profile.nutrition_recommendations[0]["value"] if profile else "91%",
+                "change": "Расчет на день" if profile else "Выше цели",
                 "tone": "neutral",
             },
         ],
@@ -160,11 +200,12 @@ def _build_dashboard_summary():
         ],
         "next_workouts": next_workouts,
         "cycle_status": {
-            "week": "Неделя 12 из 16",
-            "focus": "Сила и плотность недели с разгрузкой к выходным.",
+            "week": "Персональный день" if profile else "Неделя 12 из 16",
+            "focus": personal_plan["daily_workout"]["focus"] if personal_plan else "Сила и плотность недели с разгрузкой к выходным.",
             "slots_filled": f"{min(len(slots) + 1, 5)}/5",
             "readiness": "84%",
         },
+        "personal_plan": personal_plan,
     }
 
     return DashboardSummarySerializer(response).data
@@ -257,8 +298,8 @@ def _build_workout_catalog():
 )
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def dashboard_summary(_request):
-    return Response(_build_dashboard_summary())
+def dashboard_summary(request):
+    return Response(_build_dashboard_summary(request.user))
 
 
 @extend_schema(

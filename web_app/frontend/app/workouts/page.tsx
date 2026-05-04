@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+import DashboardShell from "../../components/dashboard/DashboardShell";
 import { fetchSessionJson } from "../../lib/session";
 import styles from "./workouts.module.css";
 
@@ -47,10 +49,10 @@ type WorkoutCatalogResponse = {
 };
 
 const fallbackWorkoutDays: WorkoutDay[] = [
-  { id: "mon", month: "Apr", day: "21", label: "Пн" },
-  { id: "tue", month: "Apr", day: "22", label: "Вт" },
-  { id: "wed", month: "Apr", day: "23", label: "Ср" },
-  { id: "thu", month: "Apr", day: "24", label: "Чт" },
+  { id: "mon", month: "Апр", day: "21", label: "Пн" },
+  { id: "tue", month: "Апр", day: "22", label: "Вт" },
+  { id: "wed", month: "Апр", day: "23", label: "Ср" },
+  { id: "thu", month: "Апр", day: "24", label: "Чт" },
 ];
 
 const fallbackWorkoutFilters: Array<{ key: WorkoutCategory; label: string }> = [
@@ -120,89 +122,33 @@ const fallbackWorkouts: WorkoutItem[] = [
     ],
     days: ["wed", "thu"],
   },
-  {
-    slug: "tempo-run",
-    title: "Tempo Run",
-    list_meta: "34 min · Track",
-    detail_meta: "Беговой темп с ровным дыханием и постепенным выходом в целевую скорость.",
-    description: "Беговая работа на пороге: устойчивый темп, техника шага и экономичность.",
-    category: "cardio",
-    accent: "coral",
-    duration: "34 min",
-    calories: "360 kcal",
-    level: "Level 03",
-    hero_eyebrow: "Run economy",
-    hero_lead: "Сценарий для ускорения темпа без резкого скачка тренировочного стресса.",
-    phases: [
-      { label: "Warm-up", value: "10 min", tone: "gold", width: "32%" },
-      { label: "Tempo", value: "18 min", tone: "coral", width: "74%" },
-      { label: "Walkdown", value: "6 min", tone: "indigo", width: "24%" },
-    ],
-    days: ["mon", "thu"],
-  },
-  {
-    slug: "leg-power",
-    title: "Leg Power",
-    list_meta: "46 min · Lower body",
-    detail_meta: "Низ тела, взрывная работа и силовая плотность без лишнего объема.",
-    description: "Тяжелый блок на ноги с акцентом на силу, скорость штанги и контроль техники.",
-    category: "strength",
-    accent: "indigo",
-    duration: "46 min",
-    calories: "500 kcal",
-    level: "Level 04",
-    hero_eyebrow: "Power session",
-    hero_lead: "Главный нижний день с понятной фазировкой и быстрым стартом из одного экрана.",
-    phases: [
-      { label: "Primer", value: "8 min", tone: "gold", width: "24%" },
-      { label: "Main lifts", value: "30 min", tone: "indigo", width: "86%" },
-      { label: "Cooldown", value: "8 min", tone: "coral", width: "28%" },
-    ],
-    days: ["tue", "wed"],
-  },
 ];
 
-function StatusBar() {
-  return (
-    <div className={styles.statusBar}>
-      <span className={styles.statusTime}>9:41</span>
-      <div className={styles.statusIcons} aria-hidden="true">
-        <span className={styles.signalBars}>
-          <i />
-          <i />
-          <i />
-          <i />
-        </span>
-        <span className={styles.wifiIcon}>
-          <i />
-        </span>
-        <span className={styles.batteryIcon}>
-          <span />
-        </span>
-      </div>
-    </div>
-  );
+function parseDurationMinutes(duration: string) {
+  const match = duration.match(/\d+/);
+  return match ? Number(match[0]) : 0;
 }
 
-function PhaseIcon({ tone }: { tone: WorkoutTone }) {
-  return (
-    <span className={`${styles.phaseIcon} ${styles[`phaseIcon${tone}`]}`} aria-hidden="true">
-      <i />
-      <i />
-      <i />
-    </span>
-  );
+function formatElapsed(seconds: number) {
+  const minutes = Math.floor(Math.max(0, seconds) / 60);
+  const remainder = Math.max(0, seconds) % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
 }
 
-function splitTitle(title: string) {
-  const words = title.split(" ");
-
-  if (words.length < 2) {
-    return [title, ""];
+function formatWorkoutCategory(category: WorkoutCategory) {
+  if (category === "cardio") {
+    return "Cardio";
   }
 
-  const pivot = Math.ceil(words.length / 2);
-  return [words.slice(0, pivot).join(" "), words.slice(pivot).join(" ")];
+  if (category === "mobility") {
+    return "Mobility";
+  }
+
+  return "Strength";
+}
+
+function getPhaseMinutes(phase: WorkoutPhase) {
+  return parseDurationMinutes(phase.value);
 }
 
 export default function WorkoutsPage() {
@@ -212,10 +158,9 @@ export default function WorkoutsPage() {
   const [activeFilter, setActiveFilter] = useState<WorkoutCategory>("strength");
   const [selectedWorkoutId, setSelectedWorkoutId] = useState(fallbackWorkouts[0].slug);
   const [startedWorkoutId, setStartedWorkoutId] = useState<string | null>(null);
+  const [elapsedByWorkout, setElapsedByWorkout] = useState<Record<string, number>>({});
   const [savedWorkoutIds, setSavedWorkoutIds] = useState<string[]>([]);
-  const [statusMessage, setStatusMessage] = useState(
-    "Экран теперь живой: выбери день, фильтр и тренировку."
-  );
+  const [statusMessage, setStatusMessage] = useState("Выберите тренировку и запустите таймер.");
 
   const workoutDays = catalog?.days?.length ? catalog.days : fallbackWorkoutDays;
   const workoutFilters = catalog?.filters?.length ? catalog.filters : fallbackWorkoutFilters;
@@ -234,16 +179,14 @@ export default function WorkoutsPage() {
 
         setCatalog(data);
         setCatalogError(null);
-        setStatusMessage("Каталог тренировок подключен к backend.");
+        setStatusMessage("Каталог тренировок загружен из backend.");
       } catch (error) {
         if (cancelled) {
           return;
         }
 
         setCatalogError(
-          error instanceof Error
-            ? error.message
-            : "Не удалось загрузить каталог тренировок."
+          error instanceof Error ? error.message : "Не удалось загрузить каталог тренировок.",
         );
       }
     }
@@ -256,15 +199,20 @@ export default function WorkoutsPage() {
   }, []);
 
   const visibleWorkouts = useMemo(() => {
-    const workoutsForDay = workouts.filter((workout) =>
-      workout.days.includes(selectedDay)
-    );
+    const workoutsForDay = workouts.filter((workout) => workout.days.includes(selectedDay));
     const workoutsForDayAndFilter = workoutsForDay.filter(
-      (workout) =>
-        workout.category === activeFilter
+      (workout) => workout.category === activeFilter,
     );
 
-    return workoutsForDayAndFilter.length ? workoutsForDayAndFilter : workoutsForDay;
+    if (workoutsForDayAndFilter.length) {
+      return workoutsForDayAndFilter;
+    }
+
+    if (workoutsForDay.length) {
+      return workoutsForDay;
+    }
+
+    return workouts.filter((workout) => workout.category === activeFilter);
   }, [activeFilter, selectedDay, workouts]);
 
   useEffect(() => {
@@ -283,341 +231,287 @@ export default function WorkoutsPage() {
     visibleWorkouts.find((workout) => workout.slug === selectedWorkoutId) ??
     workouts.find((workout) => workout.slug === selectedWorkoutId) ??
     workouts[0];
+  const selectedDayMeta = workoutDays.find((day) => day.id === selectedDay) ?? workoutDays[0];
+  const totalDurationSeconds = parseDurationMinutes(selectedWorkout.duration) * 60;
+  const elapsedSeconds = elapsedByWorkout[selectedWorkout.slug] ?? 0;
+  const sessionPercent = totalDurationSeconds
+    ? Math.min(100, Math.round((elapsedSeconds / totalDurationSeconds) * 100))
+    : 0;
+  const phaseDurations = selectedWorkout.phases.map((phase) => getPhaseMinutes(phase) * 60);
+  const activePhaseIndex = phaseDurations.findIndex((_, index) => {
+    const threshold = phaseDurations.slice(0, index + 1).reduce((sum, value) => sum + value, 0);
+    return elapsedSeconds < threshold;
+  });
+  const currentPhase =
+    selectedWorkout.phases[
+      activePhaseIndex >= 0 ? activePhaseIndex : selectedWorkout.phases.length - 1
+    ];
+  const nextPhase =
+    activePhaseIndex >= 0 && activePhaseIndex < selectedWorkout.phases.length - 1
+      ? selectedWorkout.phases[activePhaseIndex + 1]
+      : null;
 
-  const selectedDayMeta =
-    workoutDays.find((day) => day.id === selectedDay) ?? workoutDays[0];
-
-  const heroTitle = splitTitle(selectedWorkout.title);
-  const selectedIndex = visibleWorkouts.findIndex(
-    (workout) => workout.slug === selectedWorkout.slug,
-  );
-
-  function cycleWorkout(step: number) {
-    if (!visibleWorkouts.length) {
+  useEffect(() => {
+    if (startedWorkoutId !== selectedWorkout.slug) {
       return;
     }
 
-    const nextIndex =
-      (selectedIndex + step + visibleWorkouts.length) % visibleWorkouts.length;
-    const nextWorkout = visibleWorkouts[nextIndex];
-    setSelectedWorkoutId(nextWorkout.slug);
-    setStatusMessage(`Открыта тренировка ${nextWorkout.title}.`);
-  }
+    const intervalId = window.setInterval(() => {
+      setElapsedByWorkout((current) => {
+        const currentElapsed = current[selectedWorkout.slug] ?? 0;
+        const nextElapsed = Math.min(currentElapsed + 1, totalDurationSeconds);
+
+        if (nextElapsed >= totalDurationSeconds) {
+          setStartedWorkoutId(null);
+          setStatusMessage(`${selectedWorkout.title} завершена. Сохраните сессию в кабинет.`);
+        }
+
+        return {
+          ...current,
+          [selectedWorkout.slug]: nextElapsed,
+        };
+      });
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [selectedWorkout.slug, selectedWorkout.title, startedWorkoutId, totalDurationSeconds]);
 
   function toggleWorkoutStarted() {
-    const nextStarted =
-      startedWorkoutId === selectedWorkout.slug ? null : selectedWorkout.slug;
-
+    const nextStarted = startedWorkoutId === selectedWorkout.slug ? null : selectedWorkout.slug;
     setStartedWorkoutId(nextStarted);
     setStatusMessage(
       nextStarted
-        ? `${selectedWorkout.title} запущена. Можно идти по фазам экрана.`
-        : `Запуск ${selectedWorkout.title} остановлен.`
+        ? `${selectedWorkout.title} запущена. Сейчас активна фаза ${currentPhase.label}.`
+        : `${selectedWorkout.title} поставлена на паузу.`,
     );
+  }
+
+  function skipToNextPhase() {
+    if (!nextPhase || !totalDurationSeconds) {
+      setStatusMessage("Сессия уже на финальной фазе.");
+      return;
+    }
+
+    const nextElapsed = phaseDurations
+      .slice(0, activePhaseIndex + 1)
+      .reduce((sum, value) => sum + value, 0);
+    setElapsedByWorkout((current) => ({
+      ...current,
+      [selectedWorkout.slug]: Math.min(totalDurationSeconds, nextElapsed),
+    }));
+    setStatusMessage(`Переключено на фазу ${nextPhase.label}.`);
+  }
+
+  function resetWorkout() {
+    setStartedWorkoutId(null);
+    setElapsedByWorkout((current) => ({
+      ...current,
+      [selectedWorkout.slug]: 0,
+    }));
+    setStatusMessage(`${selectedWorkout.title} сброшена к старту.`);
   }
 
   function toggleWorkoutSaved() {
     const isSaved = savedWorkoutIds.includes(selectedWorkout.slug);
-    const nextSavedIds = isSaved
-      ? savedWorkoutIds.filter((workoutId) => workoutId !== selectedWorkout.slug)
-      : [...savedWorkoutIds, selectedWorkout.slug];
-
-    setSavedWorkoutIds(nextSavedIds);
+    setSavedWorkoutIds((current) =>
+      isSaved
+        ? current.filter((workoutId) => workoutId !== selectedWorkout.slug)
+        : [...current, selectedWorkout.slug],
+    );
     setStatusMessage(
       isSaved
-        ? `${selectedWorkout.title} убрана из сохраненных сессий.`
-        : `${selectedWorkout.title} сохранена в кабинет.`
+        ? `${selectedWorkout.title} убрана из сохраненных.`
+        : `${selectedWorkout.title} сохранена в кабинет.`,
     );
   }
 
   return (
-    <main className={styles.page}>
-      <div className={styles.canvas}>
-        <div className={styles.phoneShell}>
-          <article className={`${styles.phone} ${styles.heroPhone}`}>
-            <StatusBar />
-            <div className={styles.heroGlow} aria-hidden="true" />
-            <div className={styles.heroContent}>
-              <p className={styles.heroEyebrow}>{selectedWorkout.hero_eyebrow}</p>
-              <h1 className={styles.heroTitle}>
-                {heroTitle[0]}
-                <br />
-                {heroTitle[1] || selectedWorkout.category}
-              </h1>
-              <p className={styles.heroText}>{selectedWorkout.hero_lead}</p>
-              <button
-                className={styles.lightCta}
-                type="button"
-                onClick={() =>
-                  setStatusMessage(
-                    `Собран рабочий экран для ${selectedWorkout.title} на ${selectedDayMeta.label}.`
-                  )
-                }
-              >
-                Explore
-                <span aria-hidden="true">-&gt;</span>
-              </button>
-            </div>
-          </article>
-        </div>
+    <DashboardShell
+      active="workouts"
+      title="Workouts"
+      subtitle="Каталог тренировок с фильтрами, фазами, таймером сессии и сохранением в рабочий список."
+      actions={
+        <Link className={styles.secondaryAction} href="/schedule">
+          Расписание
+        </Link>
+      }
+    >
+      <section className={styles.stack}>
+        <section className={styles.hero}>
+          <div className={styles.heroCopy}>
+            <p className={styles.kicker}>{selectedWorkout.hero_eyebrow}</p>
+            <h3>{selectedWorkout.title}</h3>
+            <p>{selectedWorkout.hero_lead}</p>
+          </div>
 
-        <div className={styles.phoneShell}>
-          <article className={`${styles.phone} ${styles.detailPhone}`}>
-            <StatusBar />
-            <header className={styles.topHeader}>
+          <div className={styles.heroStats}>
+            <div>
+              <span>День</span>
+              <strong>{selectedDayMeta?.label ?? "День"}</strong>
+            </div>
+            <div>
+              <span>Категория</span>
+              <strong>{formatWorkoutCategory(selectedWorkout.category)}</strong>
+            </div>
+            <div>
+              <span>Сессия</span>
+              <strong>{startedWorkoutId === selectedWorkout.slug ? "Идет" : "Готова"}</strong>
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.controls}>
+          <div className={styles.dayRail} aria-label="Дни недели">
+            {workoutDays.map((day) => (
               <button
-                className={styles.roundButton}
+                className={day.id === selectedDay ? styles.dayActive : styles.dayButton}
+                key={`${day.month}-${day.day}-${day.id}`}
                 type="button"
-                aria-label="Вернуться к первой тренировке"
                 onClick={() => {
-                  setSelectedWorkoutId(visibleWorkouts[0]?.slug ?? workouts[0].slug);
-                  setStatusMessage("Выбор тренировки сброшен к первому доступному слоту.");
+                  setSelectedDay(day.id);
+                  setStatusMessage(`Показаны тренировки на ${day.label}.`);
                 }}
               >
-                &lt;
+                <span>{day.month}</span>
+                <strong>{day.day}</strong>
+                <small>{day.label}</small>
               </button>
-              <h2 className={styles.screenTitle}>Workout</h2>
+            ))}
+          </div>
+
+          <div className={styles.filterRail} aria-label="Тип тренировки">
+            {workoutFilters.map((filter) => (
               <button
-                className={styles.roundButtonMuted}
+                className={filter.key === activeFilter ? styles.filterActive : styles.filterButton}
+                key={filter.key}
                 type="button"
-                aria-label="Показать статус тренировки"
-                onClick={() =>
-                  setStatusMessage(
-                    `${selectedWorkout.title}: ${selectedWorkout.duration}, ${selectedWorkout.calories}.`
-                  )
-                }
-              >
-                ...
-              </button>
-            </header>
-
-            <section className={styles.featureStage}>
-              <button
-                className={`${styles.sideArrow} ${styles.sideArrowLeft}`}
-                type="button"
-                aria-label="Предыдущая тренировка"
-                onClick={() => cycleWorkout(-1)}
-              >
-                &lt;
-              </button>
-              <button
-                className={`${styles.sideArrow} ${styles.sideArrowRight}`}
-                type="button"
-                aria-label="Следующая тренировка"
-                onClick={() => cycleWorkout(1)}
-              >
-                &gt;
-              </button>
-              <div className={styles.featureHalo} aria-hidden="true" />
-              <div className={styles.featureDisc}>
-                <div className={styles.featureImage} />
-              </div>
-              <div className={styles.featureBadge}>{selectedWorkout.level}</div>
-            </section>
-
-            <section className={styles.detailBody}>
-              <h3 className={styles.featureTitle}>{selectedWorkout.title}</h3>
-              <p className={styles.featureMeta}>{selectedWorkout.detail_meta}</p>
-              <div className={styles.metaRow}>
-                <span>{selectedWorkout.duration}</span>
-                <span>{selectedWorkout.calories}</span>
-                <span>{formatWorkoutCategory(selectedWorkout.category)}</span>
-              </div>
-              <p className={styles.detailNote}>{catalogError ?? statusMessage}</p>
-            </section>
-
-            <div className={styles.primaryPanel}>
-              <button className={styles.darkCta} type="button" onClick={toggleWorkoutStarted}>
-                {startedWorkoutId === selectedWorkout.slug ? "Pause workout" : "Start workout"}
-                <span aria-hidden="true">-&gt;</span>
-              </button>
-            </div>
-          </article>
-        </div>
-
-        <div className={styles.phoneShell}>
-          <article className={`${styles.phone} ${styles.metricsPhone}`}>
-            <div className={styles.metricsHero}>
-              <StatusBar />
-              <header className={styles.overlayHeader}>
-                <button className={styles.roundButtonGhost} type="button" aria-label="Go back">
-                  &lt;
-                </button>
-                <h2 className={styles.overlayTitle}>Workouts</h2>
-                <button className={styles.roundButtonGhost} type="button" aria-label="Open options">
-                  ...
-                </button>
-              </header>
-              <div className={styles.metricsImageWrap}>
-                <div className={styles.metricsImageGlow} aria-hidden="true" />
-                <div className={styles.metricsImageCard} />
-              </div>
-            </div>
-
-            <section className={styles.metricsCard}>
-              <div className={styles.metricsHeading}>
-                <div>
-                  <h3>{selectedWorkout.title}</h3>
-                  <p>Session split</p>
-                </div>
-                <div className={styles.metricsStat}>
-                  <strong>{selectedWorkout.duration}</strong>
-                  <span>{selectedWorkout.calories}</span>
-                </div>
-              </div>
-
-              <div className={styles.phaseList}>
-                {selectedWorkout.phases.map((phase) => (
-                  <div className={styles.phaseRow} key={phase.label}>
-                    <PhaseIcon tone={phase.tone} />
-                    <div className={styles.phaseCopy}>
-                      <div className={styles.phaseHead}>
-                        <span>{phase.label}</span>
-                        <span>{phase.value}</span>
-                      </div>
-                      <div className={styles.phaseTrack}>
-                        <div
-                          className={`${styles.phaseFill} ${styles[`phaseFill${phase.tone}`]}`}
-                          style={{ width: phase.width }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button className={styles.darkCtaWide} type="button" onClick={toggleWorkoutSaved}>
-                {savedWorkoutIds.includes(selectedWorkout.slug)
-                  ? "Saved to workspace"
-                  : "Save session"}
-                <span aria-hidden="true">-&gt;</span>
-              </button>
-            </section>
-          </article>
-        </div>
-
-        <div className={styles.phoneShell}>
-          <article className={`${styles.phone} ${styles.listPhone}`}>
-            <StatusBar />
-            <header className={styles.listHeader}>
-              <button
-                className={styles.listBack}
-                type="button"
-                aria-label="Вернуться к понедельнику"
                 onClick={() => {
-                  setSelectedDay(workoutDays[0]?.id ?? fallbackWorkoutDays[0].id);
-                  setStatusMessage("Календарь возвращен к началу недели.");
+                  setActiveFilter(filter.key);
+                  setStatusMessage(`Фильтр: ${filter.label}.`);
                 }}
               >
-                &lt;
+                {filter.label}
               </button>
+            ))}
+          </div>
+        </section>
+
+        <section className={styles.grid}>
+          <aside className={styles.listPanel}>
+            <div className={styles.panelHead}>
               <div>
-                <p className={styles.listLabel}>My</p>
-                <h2 className={styles.listTitle}>Workouts</h2>
+                <p className={styles.kicker}>Catalog</p>
+                <h3>Доступные тренировки</h3>
               </div>
-              <div className={styles.listActions}>
-                <button
-                  className={styles.smallIconButton}
-                  type="button"
-                  aria-label="Создать тренировку"
-                  onClick={() =>
-                    setStatusMessage(
-                      `Новый слот создается на ${selectedDayMeta.label}. Базой станет ${selectedWorkout.title}.`
-                    )
-                  }
-                >
-                  +
-                </button>
-                <button
-                  className={styles.smallIconButton}
-                  type="button"
-                  aria-label="Поделиться тренировками"
-                  onClick={() =>
-                    setStatusMessage(
-                      `Ссылка на ${selectedWorkout.title} подготовлена для отправки тренеру.`
-                    )
-                  }
-                >
-                  /
-                </button>
-              </div>
-            </header>
-
-            <div className={styles.dayScroller}>
-              {workoutDays.map((day) => (
-                <button
-                  className={`${styles.dayCard} ${day.id === selectedDay ? styles.dayCardActive : ""}`}
-                  key={`${day.month}-${day.day}`}
-                  type="button"
-                  onClick={() => {
-                    setSelectedDay(day.id);
-                    setStatusMessage(`Календарь переключен на ${day.label}.`);
-                  }}
-                >
-                  <span>{day.month}</span>
-                  <strong>{day.day}</strong>
-                </button>
-              ))}
+              <span>{visibleWorkouts.length}</span>
             </div>
 
-            <div className={styles.segmentedControl}>
-              {workoutFilters.map((filter) => (
-                <button
-                  className={`${styles.segmentButton} ${filter.key === activeFilter ? styles.segmentButtonActive : ""}`}
-                  key={filter.label}
-                  type="button"
-                  onClick={() => {
-                    setActiveFilter(filter.key);
-                    setStatusMessage(`Фильтр переключен на ${filter.label}.`);
-                  }}
-                >
-                  {filter.label}
-                </button>
-              ))}
-            </div>
+            {catalogError ? <p className={styles.errorText}>{catalogError}</p> : null}
 
-            <p className={styles.listStatus}>{statusMessage}</p>
-
-            <section className={styles.workoutList}>
+            <div className={styles.workoutList}>
               {visibleWorkouts.map((workout) => (
                 <button
-                  className={`${styles.workoutCard} ${workout.slug === selectedWorkout.slug ? styles.workoutCardActive : ""}`}
-                  key={workout.title}
+                  className={workout.slug === selectedWorkout.slug ? styles.workoutActive : styles.workoutCard}
+                  key={workout.slug}
                   type="button"
                   onClick={() => {
                     setSelectedWorkoutId(workout.slug);
-                    setStatusMessage(`Открыта карточка ${workout.title}.`);
+                    setStatusMessage(`Открыта ${workout.title}.`);
                   }}
                 >
-                  <div className={`${styles.workoutAccent} ${styles[`workoutAccent${workout.accent}`]}`} aria-hidden="true" />
-                  <div className={styles.workoutInfo}>
-                    <h3>{workout.title}</h3>
-                    <p>{workout.list_meta}</p>
-                  </div>
-                  <span
-                    className={styles.listDots}
-                    aria-label={`Подробнее о ${workout.title}`}
-                  >
-                    ...
+                  <span className={`${styles.accentDot} ${styles[`accent${workout.accent}`]}`} />
+                  <span>
+                    <strong>{workout.title}</strong>
+                    <small>{workout.list_meta}</small>
                   </span>
+                  <em>{savedWorkoutIds.includes(workout.slug) ? "Saved" : workout.level}</em>
                 </button>
               ))}
-            </section>
+            </div>
+          </aside>
+
+          <article className={styles.sessionPanel}>
+            <div className={styles.sessionTop}>
+              <div>
+                <p className={styles.kicker}>Session</p>
+                <h3>{selectedWorkout.title}</h3>
+                <p>{selectedWorkout.detail_meta}</p>
+              </div>
+              <span className={styles.categoryTag}>{formatWorkoutCategory(selectedWorkout.category)}</span>
+            </div>
+
+            <div className={styles.progressBlock}>
+              <div className={styles.timerRow}>
+                <strong>{formatElapsed(elapsedSeconds)}</strong>
+                <span>{selectedWorkout.duration}</span>
+              </div>
+              <div className={styles.progressTrack}>
+                <span style={{ width: `${sessionPercent}%` }} />
+              </div>
+              <div className={styles.progressMeta}>
+                <span>{sessionPercent}%</span>
+                <span>{currentPhase.label}</span>
+              </div>
+            </div>
+
+            <div className={styles.actions}>
+              <button className={styles.primaryButton} type="button" onClick={toggleWorkoutStarted}>
+                {startedWorkoutId === selectedWorkout.slug ? "Пауза" : "Старт"}
+              </button>
+              <button className={styles.ghostButton} type="button" onClick={skipToNextPhase}>
+                {nextPhase ? `Следующая: ${nextPhase.label}` : "Финальная фаза"}
+              </button>
+              <button className={styles.ghostButton} type="button" onClick={resetWorkout}>
+                Сбросить
+              </button>
+              <button className={styles.saveButton} type="button" onClick={toggleWorkoutSaved}>
+                {savedWorkoutIds.includes(selectedWorkout.slug) ? "Сохранено" : "Сохранить"}
+              </button>
+            </div>
+
+            <p className={styles.statusText}>{statusMessage}</p>
           </article>
-        </div>
-      </div>
-    </main>
+
+          <aside className={styles.phasePanel}>
+            <div className={styles.panelHead}>
+              <div>
+                <p className={styles.kicker}>Plan</p>
+                <h3>Фазы тренировки</h3>
+              </div>
+              <span>{selectedWorkout.calories}</span>
+            </div>
+
+            <div className={styles.phaseList}>
+              {selectedWorkout.phases.map((phase, index) => (
+                <div
+                  className={index === activePhaseIndex ? styles.phaseActive : styles.phaseCard}
+                  key={`${selectedWorkout.slug}-${phase.label}`}
+                >
+                  <div className={styles.phaseHead}>
+                    <span className={`${styles.phaseIcon} ${styles[`phase${phase.tone}`]}`} />
+                    <div>
+                      <strong>{phase.label}</strong>
+                      <small>{phase.value}</small>
+                    </div>
+                  </div>
+                  <div className={styles.phaseTrack}>
+                    <span style={{ width: index < activePhaseIndex ? "100%" : phase.width }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className={styles.coachCue}>
+              <span>Coach cue</span>
+              <p>
+                {nextPhase
+                  ? `Держите текущую фазу ${currentPhase.label.toLowerCase()}, затем переходите к ${nextPhase.label.toLowerCase()}.`
+                  : "Финальный блок активен: завершите технику и сохраните сессию."}
+              </p>
+            </div>
+          </aside>
+        </section>
+      </section>
+    </DashboardShell>
   );
-}
-
-function formatWorkoutCategory(filter: WorkoutCategory) {
-  if (filter === "cardio") {
-    return "Cardio";
-  }
-
-  if (filter === "mobility") {
-    return "Mobility";
-  }
-
-  return "Strength";
 }

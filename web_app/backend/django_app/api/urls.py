@@ -14,6 +14,7 @@ urlpatterns = [
     re_path(r"^auth/token/?$", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
     re_path(r"^auth/token/refresh/?$", CustomTokenRefreshView.as_view(), name="token_refresh"),
     re_path(r"^auth/me/?$", views.me, name="api-auth-me"),
+    re_path(r"^auth/profile/?$", views.profile_assessment, name="api-auth-profile"),
     re_path(r"^dashboard/summary/?$", views.dashboard_summary, name="api-dashboard-summary"),
     re_path(r"^schedule/?$", views.schedule, name="api-schedule"),
     re_path(r"^workouts/?$", views.workouts, name="api-workouts"),

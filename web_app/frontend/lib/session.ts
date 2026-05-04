@@ -5,11 +5,61 @@ export type SessionUser = {
   username: string;
   email: string;
   full_name: string;
+  profile: UserProfile | null;
 };
 
 type ApiError = Error & {
   status?: number;
   payload?: unknown;
+};
+
+export type UserGoal =
+  | "fat_loss"
+  | "muscle_gain"
+  | "endurance"
+  | "wellness"
+  | "recomposition";
+
+export type UserSex = "male" | "female" | "other";
+
+export type NutritionRecommendation = {
+  label: string;
+  value: string;
+  note: string;
+};
+
+export type DailyWorkout = {
+  title: string;
+  focus: string;
+  duration: string;
+  intensity: string;
+  blocks: string[];
+};
+
+export type UserProfile = {
+  sex: UserSex;
+  sex_label: string;
+  age: number;
+  height_cm: string;
+  weight_kg: string;
+  goal: UserGoal;
+  goal_label: string;
+  nutrition_recommendations: NutritionRecommendation[];
+  daily_workout: DailyWorkout;
+};
+
+export type RegistrationPayload = {
+  fullName: string;
+  email: string;
+  password: string;
+};
+
+export type AssessmentPayload = {
+  sex: UserSex;
+  age: number;
+  heightCm: number;
+  weightKg: number;
+  goal: UserGoal;
 };
 
 type TokenPayload = {
@@ -293,24 +343,20 @@ export async function loginWithCredentials(
   return user;
 }
 
-export async function registerWithCredentials(
-  fullName: string,
-  email: string,
-  password: string,
-): Promise<SessionUser> {
-  const normalizedEmail = email.trim().toLowerCase();
+export async function registerWithCredentials(payload: RegistrationPayload): Promise<SessionUser> {
+  const normalizedEmail = payload.email.trim().toLowerCase();
 
   await fetchJson(`${getApiBase()}/auth/register/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       email: normalizedEmail,
-      full_name: fullName.trim(),
-      password,
+      full_name: payload.fullName.trim(),
+      password: payload.password,
     }),
   });
 
-  return loginWithCredentials(normalizedEmail, password);
+  return loginWithCredentials(normalizedEmail, payload.password);
 }
 
 export async function fetchSessionJson(path: string, init?: RequestInit): Promise<unknown> {
@@ -329,4 +375,20 @@ export async function fetchSessionJson(path: string, init?: RequestInit): Promis
     access = await refreshAccessToken(refresh);
     return authorizedFetchJson(access, path, init);
   }
+}
+
+export async function saveAssessment(payload: AssessmentPayload): Promise<SessionUser> {
+  await fetchSessionJson("/auth/profile/", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      sex: payload.sex,
+      age: payload.age,
+      height_cm: payload.heightCm.toFixed(1),
+      weight_kg: payload.weightKg.toFixed(1),
+      goal: payload.goal,
+    }),
+  });
+
+  return ensureSessionUser();
 }
