@@ -17,6 +17,7 @@ urlpatterns = [
     re_path(r"^auth/profile/?$", views.profile_assessment, name="api-auth-profile"),
     re_path(r"^dashboard/summary/?$", views.dashboard_summary, name="api-dashboard-summary"),
     re_path(r"^schedule/?$", views.schedule, name="api-schedule"),
+    re_path(r"^workouts/complete/?$", views.complete_workout, name="api-workouts-complete"),
     re_path(r"^workouts/?$", views.workouts, name="api-workouts"),
     re_path(r"^echo/?$", views.echo, name="api-echo"),
 ]

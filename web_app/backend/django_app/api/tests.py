@@ -2,6 +2,8 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from .models import WorkoutSession
+
 
 class AuthApiTests(APITestCase):
     def setUp(self):
@@ -279,3 +281,49 @@ class AuthApiTests(APITestCase):
         self.assertEqual(len(response.data["filters"]), 3)
         self.assertGreaterEqual(len(response.data["workouts"]), 3)
         self.assertGreaterEqual(len(response.data["workouts"][0]["phases"]), 1)
+        self.assertIn("completed_count", response.data["workouts"][0])
+        self.assertIn("last_completed_at", response.data["workouts"][0])
+
+    def test_complete_workout_creates_session_and_returns_repeat_count(self):
+        self.client.force_authenticate(user=self.user)
+        catalog = self.client.get("/api/workouts/")
+        workout_slug = catalog.data["workouts"][0]["slug"]
+
+        first_response = self.client.post(
+            "/api/workouts/complete/",
+            {"workout_slug": workout_slug, "elapsed_seconds": 900},
+            format="json",
+        )
+        second_response = self.client.post(
+            "/api/workouts/complete/",
+            {"workout_slug": workout_slug, "elapsed_seconds": 880},
+            format="json",
+        )
+
+        self.assertEqual(first_response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(second_response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(first_response.data["completed_count"], 1)
+        self.assertEqual(second_response.data["completed_count"], 2)
+        self.assertEqual(
+            WorkoutSession.objects.filter(user=self.user, workout__slug=workout_slug).count(),
+            2,
+        )
+
+    def test_workouts_catalog_includes_user_repeat_stats(self):
+        self.client.force_authenticate(user=self.user)
+        catalog = self.client.get("/api/workouts/")
+        workout_slug = catalog.data["workouts"][0]["slug"]
+
+        self.client.post(
+            "/api/workouts/complete/",
+            {"workout_slug": workout_slug, "elapsed_seconds": 760},
+            format="json",
+        )
+
+        updated_catalog = self.client.get("/api/workouts/")
+        updated_workout = next(
+            item for item in updated_catalog.data["workouts"] if item["slug"] == workout_slug
+        )
+
+        self.assertEqual(updated_workout["completed_count"], 1)
+        self.assertIsNotNone(updated_workout["last_completed_at"])

@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Count, Max, Q
 from rest_framework import serializers, status
 from django.db.models import Prefetch
 from rest_framework.decorators import api_view, permission_classes
@@ -49,6 +50,7 @@ from .serializers import (
     CustomTokenObtainPairSerializer,
     RegisterSerializer,
     WorkoutCatalogSerializer,
+    WorkoutCompletionSerializer,
     WorkoutFilterSerializer,
     WorkoutSerializer,
     UserProfileSerializer,
@@ -247,12 +249,22 @@ def _build_schedule_response():
     return {"days": grouped_days}
 
 
-def _build_workout_catalog():
+def _build_workout_catalog(user):
     workouts = (
         Workout.objects.prefetch_related(
             Prefetch("phases", queryset=WorkoutPhase.objects.order_by("position"))
         )
         .prefetch_related("schedule_slots")
+        .annotate(
+            completed_count=Count(
+                "completed_sessions",
+                filter=Q(completed_sessions__user=user),
+            ),
+            last_completed_at=Max(
+                "completed_sessions__completed_at",
+                filter=Q(completed_sessions__user=user),
+            ),
+        )
         .order_by("title")
     )
     schedule_days = list(
@@ -319,7 +331,21 @@ def schedule(_request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def workouts(_request):
-    return Response(_build_workout_catalog())
+    return Response(_build_workout_catalog(_request.user))
+
+
+@extend_schema(
+    description="Фиксирует выполненную тренировку и обновляет счетчик повторов.",
+    request=WorkoutCompletionSerializer,
+    responses={201: WorkoutCompletionSerializer},
+)
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def complete_workout(request):
+    serializer = WorkoutCompletionSerializer(data=request.data, context={"request": request})
+    serializer.is_valid(raise_exception=True)
+    payload = serializer.save()
+    return Response(payload, status=status.HTTP_201_CREATED)
 
 
 

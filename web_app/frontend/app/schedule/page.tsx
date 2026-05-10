@@ -41,7 +41,7 @@ export default function SchedulePage() {
 
     async function loadSchedule() {
       try {
-        const data = (await fetchSessionJson("/schedule/")) as ScheduleResponse;
+        const data = (await fetchSessionJson("/schedule")) as ScheduleResponse;
 
         if (cancelled) {
           return;

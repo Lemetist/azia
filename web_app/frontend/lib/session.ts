@@ -71,6 +71,12 @@ type RefreshPayload = {
   access?: string;
 };
 
+type WorkoutCompletionPayload = {
+  workout_slug: string;
+  completed_count: number;
+  last_completed_at: string;
+};
+
 const ACCESS_KEY = "access";
 const REFRESH_KEY = "refresh";
 const USER_KEY = "me";
@@ -262,7 +268,7 @@ async function authorizedFetchJson(access: string, path: string, init?: RequestI
 }
 
 export async function fetchSessionUser(access: string): Promise<SessionUser> {
-  return (await fetchJson(`${getApiBase()}/auth/me/`, {
+  return (await fetchJson(`${getApiBase()}/auth/me`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${access}`,
@@ -271,7 +277,7 @@ export async function fetchSessionUser(access: string): Promise<SessionUser> {
 }
 
 export async function refreshAccessToken(refresh: string): Promise<string> {
-  const data = (await fetchJson(`${getApiBase()}/auth/token/refresh/`, {
+  const data = (await fetchJson(`${getApiBase()}/auth/token/refresh`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refresh }),
@@ -327,7 +333,7 @@ export async function loginWithCredentials(
   password: string,
 ): Promise<SessionUser> {
   const normalizedEmail = email.trim().toLowerCase();
-  const data = (await fetchJson(`${getApiBase()}/auth/token/`, {
+  const data = (await fetchJson(`${getApiBase()}/auth/token`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username: normalizedEmail, password }),
@@ -346,7 +352,7 @@ export async function loginWithCredentials(
 export async function registerWithCredentials(payload: RegistrationPayload): Promise<SessionUser> {
   const normalizedEmail = payload.email.trim().toLowerCase();
 
-  await fetchJson(`${getApiBase()}/auth/register/`, {
+  await fetchJson(`${getApiBase()}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -378,7 +384,7 @@ export async function fetchSessionJson(path: string, init?: RequestInit): Promis
 }
 
 export async function saveAssessment(payload: AssessmentPayload): Promise<SessionUser> {
-  await fetchSessionJson("/auth/profile/", {
+  await fetchSessionJson("/auth/profile", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -391,4 +397,18 @@ export async function saveAssessment(payload: AssessmentPayload): Promise<Sessio
   });
 
   return ensureSessionUser();
+}
+
+export async function completeWorkoutSession(
+  workoutSlug: string,
+  elapsedSeconds: number,
+): Promise<WorkoutCompletionPayload> {
+  return (await fetchSessionJson("/workouts/complete", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      workout_slug: workoutSlug,
+      elapsed_seconds: Math.max(1, Math.floor(elapsedSeconds)),
+    }),
+  })) as WorkoutCompletionPayload;
 }

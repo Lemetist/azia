@@ -378,6 +378,301 @@
   margin-top: 22px;
 }
 
+.liveModelCard {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(141, 162, 255, 0.26);
+  background: rgba(141, 162, 255, 0.1);
+}
+
+.liveModelHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.liveModelLabel {
+  margin: 0;
+  color: #b9c6ff;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.liveModelHead span {
+  color: #c9d3ff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.liveModelCard h4 {
+  margin: 10px 0 0;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.coachDemoStage {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(141, 162, 255, 0.22);
+  background: rgba(8, 12, 20, 0.45);
+  display: grid;
+  place-items: center;
+}
+
+.coachFigure {
+  position: relative;
+  width: 86px;
+  height: 132px;
+  transform-origin: center bottom;
+}
+
+.coachHead {
+  position: absolute;
+  top: 4px;
+  left: 31px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffd7a2;
+}
+
+.coachTorso {
+  position: absolute;
+  top: 28px;
+  left: 38px;
+  width: 10px;
+  height: 48px;
+  border-radius: 999px;
+  background: #c9d3ff;
+}
+
+.coachLimb {
+  position: absolute;
+  width: 8px;
+  height: 42px;
+  border-radius: 999px;
+  background: #8da2ff;
+  transform-origin: top center;
+}
+
+.coachArmLeft {
+  top: 34px;
+  left: 22px;
+}
+
+.coachArmRight {
+  top: 34px;
+  left: 56px;
+}
+
+.coachLegLeft {
+  top: 72px;
+  left: 33px;
+}
+
+.coachLegRight {
+  top: 72px;
+  left: 45px;
+}
+
+.coachShadow {
+  margin-top: 4px;
+  width: 74px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(10, 12, 18, 0.55);
+  filter: blur(1px);
+}
+
+.coachPaused {
+  opacity: 0.9;
+}
+
+.coachRunning {
+  opacity: 1;
+}
+
+.poseidle .coachArmLeft,
+.poseidle .coachArmRight,
+.poseidle .coachLegLeft,
+.poseidle .coachLegRight {
+  transform: rotate(0deg);
+}
+
+.poseidle .coachTorso {
+  transform: translateY(0);
+}
+
+.posestrength .coachArmLeft {
+  transform: rotate(-34deg);
+}
+
+.posestrength .coachArmRight {
+  transform: rotate(34deg);
+}
+
+.posestrength .coachLegLeft {
+  transform: rotate(10deg);
+}
+
+.posestrength .coachLegRight {
+  transform: rotate(-10deg);
+}
+
+.posecardio .coachArmLeft,
+.posecardio .coachArmRight,
+.posecardio .coachLegLeft,
+.posecardio .coachLegRight {
+  animation: coachRun 0.95s ease-in-out infinite;
+}
+
+.posecardio .coachArmRight,
+.posecardio .coachLegLeft {
+  animation-delay: -0.47s;
+}
+
+.posemobility .coachArmLeft,
+.posemobility .coachArmRight {
+  animation: coachMobilityArm 2.1s ease-in-out infinite;
+}
+
+.posemobility .coachArmRight {
+  animation-delay: -1.05s;
+}
+
+.posemobility .coachLegLeft,
+.posemobility .coachLegRight {
+  transform: rotate(8deg);
+}
+
+.posecooldown .coachTorso {
+  animation: coachBreath 2.2s ease-in-out infinite;
+}
+
+.posecooldown .coachArmLeft {
+  transform: rotate(-18deg);
+}
+
+.posecooldown .coachArmRight {
+  transform: rotate(18deg);
+}
+
+.posecooldown .coachLegLeft,
+.posecooldown .coachLegRight {
+  transform: rotate(4deg);
+}
+
+.coachTechniqueList {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.coachTechniqueList li {
+  color: rgba(233, 236, 242, 0.92);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.liveModelActions {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.liveModelActions li {
+  color: rgba(233, 236, 242, 0.9);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.liveModelUpcoming {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+@keyframes coachRun {
+  0%,
+  100% {
+    transform: rotate(26deg);
+  }
+  50% {
+    transform: rotate(-26deg);
+  }
+}
+
+@keyframes coachMobilityArm {
+  0%,
+  100% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(-58deg);
+  }
+}
+
+@keyframes coachBreath {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.06);
+  }
+}
+
+.nextStepCard {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(241, 141, 52, 0.24);
+  background: rgba(241, 141, 52, 0.1);
+}
+
+.nextStepLabel {
+  margin: 0;
+  color: #ffd7a2;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.nextStepMessage {
+  margin: 10px 0 0;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.stepsList {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.stepItem,
+.stepActive {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.stepActive {
+  color: #ffd7a2;
+  font-weight: 700;
+}
+
 .primaryButton,
 .ghostButton,
 .saveButton,
@@ -412,6 +707,18 @@
 .saveButton:hover,
 .secondaryAction:hover {
   transform: translateY(-1px);
+}
+
+.primaryButton:disabled,
+.ghostButton:disabled,
+.saveButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+
+.recommendedAction {
+  box-shadow: 0 0 0 2px rgba(241, 141, 52, 0.4);
 }
 
 .statusText {

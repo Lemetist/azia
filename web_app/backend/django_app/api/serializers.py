@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
-from .models import Coach, ScheduleSlot, UserProfile, Workout, WorkoutPhase
+from .models import Coach, ScheduleSlot, UserProfile, Workout, WorkoutPhase, WorkoutSession
 from .tokens import (
     get_user_from_refresh_token,
     issue_access_token,
@@ -199,6 +199,8 @@ class WorkoutPhaseSerializer(serializers.ModelSerializer):
 class WorkoutSerializer(serializers.ModelSerializer):
     phases = WorkoutPhaseSerializer(many=True, read_only=True)
     days = serializers.SerializerMethodField()
+    completed_count = serializers.SerializerMethodField()
+    last_completed_at = serializers.SerializerMethodField()
 
     class Meta:
         model = Workout
@@ -217,6 +219,8 @@ class WorkoutSerializer(serializers.ModelSerializer):
             "hero_lead",
             "days",
             "phases",
+            "completed_count",
+            "last_completed_at",
         ]
 
     def get_days(self, obj):
@@ -226,6 +230,16 @@ class WorkoutSerializer(serializers.ModelSerializer):
             .distinct()
         )
         return list(day_ids)
+
+    def get_completed_count(self, obj):
+        value = getattr(obj, "completed_count", None)
+        if value is None:
+            return 0
+        return int(value)
+
+    def get_last_completed_at(self, obj):
+        value = getattr(obj, "last_completed_at", None)
+        return value
 
 
 class ScheduleSessionSerializer(serializers.ModelSerializer):
@@ -327,3 +341,34 @@ class WorkoutCatalogSerializer(serializers.Serializer):
     days = WorkoutDaySerializer(many=True)
     filters = WorkoutFilterSerializer(many=True)
     workouts = WorkoutSerializer(many=True)
+
+
+class WorkoutCompletionSerializer(serializers.Serializer):
+    workout_slug = serializers.SlugField()
+    elapsed_seconds = serializers.IntegerField(min_value=1, write_only=True)
+    completed_count = serializers.IntegerField(read_only=True)
+    last_completed_at = serializers.DateTimeField(read_only=True)
+
+    def validate_workout_slug(self, value):
+        workout = Workout.objects.filter(slug=value).first()
+        if workout is None:
+            raise serializers.ValidationError("Тренировка не найдена.")
+        self.context["workout"] = workout
+        return value
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        workout = self.context["workout"]
+        elapsed_seconds = validated_data["elapsed_seconds"]
+
+        session = WorkoutSession.objects.create(
+            user=user,
+            workout=workout,
+            elapsed_seconds=elapsed_seconds,
+        )
+        completed_count = WorkoutSession.objects.filter(user=user, workout=workout).count()
+        return {
+            "workout_slug": workout.slug,
+            "completed_count": completed_count,
+            "last_completed_at": session.completed_at,
+        }

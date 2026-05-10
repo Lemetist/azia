@@ -278,6 +278,30 @@ class Workout(models.Model):
         return self.title
 
 
+class WorkoutSession(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="workout_sessions",
+    )
+    workout = models.ForeignKey(
+        Workout,
+        on_delete=models.CASCADE,
+        related_name="completed_sessions",
+    )
+    elapsed_seconds = models.PositiveIntegerField()
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-completed_at", "-id"]
+        indexes = [
+            models.Index(fields=["user", "workout", "-completed_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user} · {self.workout} · {self.completed_at:%Y-%m-%d %H:%M}"
+
+
 class WorkoutPhase(models.Model):
     workout = models.ForeignKey(Workout, on_delete=models.CASCADE, related_name="phases")
     label = models.CharField(max_length=80)

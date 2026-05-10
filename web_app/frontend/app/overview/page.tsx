@@ -56,7 +56,7 @@ export default function OverviewPage() {
 
     async function loadSummary() {
       try {
-        const data = (await fetchSessionJson("/dashboard/summary/")) as DashboardSummary;
+        const data = (await fetchSessionJson("/dashboard/summary")) as DashboardSummary;
 
         if (cancelled) {
           return;
