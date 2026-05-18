@@ -497,6 +497,389 @@
   line-height: 1.18;
 }
 
+.progressHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.65fr);
+  gap: 22px;
+}
+
+.progressHeroMain,
+.progressScoreCard,
+.progressDecision {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow-soft);
+}
+
+.progressHeroMain {
+  min-height: 360px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background:
+    linear-gradient(120deg, rgba(7, 10, 15, 0.92), rgba(7, 10, 15, 0.64)),
+    url("/images/gym-reference.jpg") center/cover;
+}
+
+.progressHeroMain h3 {
+  max-width: 780px;
+  margin: 18px 0 0;
+  font-size: clamp(38px, 4.6vw, 68px);
+  line-height: 0.92;
+  letter-spacing: -0.05em;
+}
+
+.progressHeroMain p:last-child {
+  max-width: 640px;
+  margin: 18px 0 0;
+  color: rgba(233, 236, 242, 0.78);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.progressHeroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.progressHeroMeta span {
+  min-height: 36px;
+  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(233, 236, 242, 0.86);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.progressScoreCard {
+  min-height: 360px;
+  padding: 28px;
+  display: grid;
+  align-content: space-between;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(122, 214, 138, 0.16), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+}
+
+.progressRing {
+  width: min(220px, 100%);
+  aspect-ratio: 1;
+  margin: 0 auto 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, #151a20 0 58%, transparent 59%),
+    conic-gradient(#7ad68a 0 84%, rgba(255, 255, 255, 0.1) 84% 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.progressRing span {
+  font-size: clamp(42px, 5vw, 58px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.scoreLabel {
+  margin: 0 0 10px;
+  color: #a6ebb2;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.progressScoreCard h3,
+.progressDecision h3 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.04;
+}
+
+.progressStatGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.progressMainGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(330px, 0.85fr);
+  gap: 22px;
+}
+
+.progressDetailGrid {
+  display: grid;
+  grid-template-columns: 0.8fr 1fr 1.2fr;
+  gap: 22px;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.panelHeader .sectionTitle {
+  margin-bottom: 0;
+}
+
+.panelHeader .panelCopy {
+  margin-top: 8px;
+}
+
+.trendPanel,
+.goalPanel {
+  min-height: 480px;
+}
+
+.trendChart {
+  min-height: 314px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: flex-end;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 24px;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px) 0 0 / 100% 25%,
+    rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.trendColumn {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.trendBars {
+  height: 238px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+}
+
+.trendBars span {
+  width: min(34px, 38%);
+  min-height: 18px;
+  border-radius: 999px 999px 8px 8px;
+}
+
+.volumeBar {
+  background: linear-gradient(180deg, #ffc96c 0%, #f18d34 100%);
+}
+
+.recoveryBar {
+  background: linear-gradient(180deg, #a6ebb2 0%, #4a9f68 100%);
+  opacity: 0.9;
+}
+
+.trendLegend {
+  display: grid;
+  gap: 2px;
+  text-align: center;
+}
+
+.trendLegend strong {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.trendLegend span,
+.chartLegend span,
+.markerCard span,
+.markerCard small,
+.goalValueRow small,
+.weekLoadItem span,
+.weekLoadItem strong {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.chartLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.chartLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chartLegend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legendVolume {
+  background: #f18d34;
+}
+
+.legendRecovery {
+  background: #7ad68a;
+}
+
+.goalList,
+.balanceList {
+  display: grid;
+  gap: 14px;
+}
+
+.goalCard,
+.balanceItem,
+.markerCard {
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.goalValueRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.goalValueRow span {
+  color: #f4f6fb;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.goalTrack {
+  height: 9px;
+  margin-top: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.goalTrack span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #f18d34, #ffd08e);
+}
+
+.balanceItem {
+  display: grid;
+  gap: 8px;
+}
+
+.balanceHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.balanceHead strong {
+  font-size: 18px;
+}
+
+.markerGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.markerCard {
+  min-height: 118px;
+  display: grid;
+  align-content: space-between;
+}
+
+.markerCard strong {
+  display: block;
+  color: #f4f6fb;
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.markerCard small {
+  color: #a6ebb2;
+}
+
+.weekLoad {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.weekLoadItem {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  text-align: center;
+}
+
+.weekLoadTrack {
+  width: 100%;
+  height: 170px;
+  padding: 6px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.weekLoadTrack i {
+  width: 100%;
+  min-height: 14px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, #ffc96c, #f18d34);
+}
+
+.weekLoadItem strong {
+  max-width: 76px;
+  min-height: 32px;
+  color: rgba(233, 236, 242, 0.78);
+}
+
+.progressDecision {
+  min-height: 190px;
+  padding: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background:
+    linear-gradient(120deg, rgba(122, 214, 138, 0.12), rgba(255, 255, 255, 0.04)),
+    rgba(255, 255, 255, 0.035);
+}
+
+.progressDecision p:last-child {
+  max-width: 760px;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
 @media (max-width: 1200px) {
   .heroGrid,
   .doubleGrid,
@@ -505,7 +888,11 @@
   .plansGrid,
   .factsGrid,
   .statGrid,
-  .actionGrid {
+  .actionGrid,
+  .progressHero,
+  .progressStatGrid,
+  .progressMainGrid,
+  .progressDetailGrid {
     grid-template-columns: 1fr;
   }
 
@@ -515,7 +902,11 @@
   .mediaPanel,
   .mediaPanelLarge,
   .heroPanel,
-  .scheduleDay {
+  .scheduleDay,
+  .progressHeroMain,
+  .progressScoreCard,
+  .trendPanel,
+  .goalPanel {
     min-height: auto;
   }
 
@@ -554,5 +945,48 @@
 
   .heroCopy h3 {
     font-size: 40px;
+  }
+
+  .progressHeroMain,
+  .progressScoreCard,
+  .progressDecision {
+    padding: 20px;
+  }
+
+  .progressHeroMain h3 {
+    font-size: 40px;
+  }
+
+  .panelHeader,
+  .progressDecision,
+  .goalValueRow {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .trendChart {
+    min-height: 260px;
+    padding: 14px;
+    gap: 8px;
+  }
+
+  .trendBars {
+    height: 178px;
+  }
+
+  .trendBars span {
+    width: min(24px, 42%);
+  }
+
+  .markerGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .weekLoad {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .weekLoadTrack {
+    height: 126px;
   }
 }
