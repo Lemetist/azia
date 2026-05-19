@@ -245,6 +245,7 @@ class WorkoutSerializer(serializers.ModelSerializer):
 class ScheduleSessionSerializer(serializers.ModelSerializer):
     coach = serializers.CharField(source="coach.name")
     workout_slug = serializers.CharField(source="workout.slug")
+    workout_category = serializers.CharField(source="workout.category")
 
     class Meta:
         model = ScheduleSlot
@@ -256,6 +257,7 @@ class ScheduleSessionSerializer(serializers.ModelSerializer):
             "spots",
             "status",
             "workout_slug",
+            "workout_category",
         ]
 
 

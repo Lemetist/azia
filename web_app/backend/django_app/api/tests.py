@@ -267,9 +267,10 @@ class AuthApiTests(APITestCase):
         response = self.client.get("/api/schedule/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertGreaterEqual(len(response.data["days"]), 3)
+        self.assertGreaterEqual(len(response.data["days"]), 7)
         self.assertIn("sessions", response.data["days"][0])
         self.assertIn("workout_slug", response.data["days"][0]["sessions"][0])
+        self.assertIn("workout_category", response.data["days"][0]["sessions"][0])
 
     def test_workouts_returns_catalog_with_phases_and_days(self):
         self.client.force_authenticate(user=self.user)

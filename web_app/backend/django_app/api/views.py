@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Max, Q
 from rest_framework import serializers, status
@@ -218,23 +220,19 @@ def _build_schedule_response():
         ScheduleSlot.objects.select_related("coach", "workout").order_by("position")
     )
 
-    grouped_days: list[dict] = []
-    current_day_id = None
-    current_group = None
+    grouped_days: OrderedDict[str, dict] = OrderedDict()
 
     for slot in slots:
-        if slot.day_id != current_day_id:
-            current_day_id = slot.day_id
-            current_group = {
+        if slot.day_id not in grouped_days:
+            grouped_days[slot.day_id] = {
                 "day_id": slot.day_id,
                 "day": slot.day,
                 "date": slot.date,
                 "load": slot.load,
                 "sessions": [],
             }
-            grouped_days.append(current_group)
 
-        current_group["sessions"].append(
+        grouped_days[slot.day_id]["sessions"].append(
             {
                 "time": slot.time,
                 "title": slot.title,
@@ -243,10 +241,11 @@ def _build_schedule_response():
                 "spots": slot.spots,
                 "status": slot.status,
                 "workout_slug": slot.workout.slug,
+                "workout_category": slot.workout.category,
             }
         )
 
-    return {"days": grouped_days}
+    return {"days": list(grouped_days.values())}
 
 
 def _build_workout_catalog(user):
