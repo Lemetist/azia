@@ -344,3 +344,32 @@ class ScheduleSlot(models.Model):
 
     def __str__(self) -> str:
         return f"{self.day} {self.time} {self.title}"
+
+
+class ScheduleBooking(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="schedule_bookings",
+    )
+    slot = models.ForeignKey(
+        ScheduleSlot,
+        on_delete=models.CASCADE,
+        related_name="bookings",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "slot"],
+                name="unique_schedule_booking_per_user_slot",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["user", "slot"], name="api_schedul_user_id_279972_idx"),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user} · {self.slot}"

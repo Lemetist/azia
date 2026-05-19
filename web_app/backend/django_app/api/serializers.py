@@ -3,7 +3,15 @@ from django.contrib.auth import authenticate
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
-from .models import Coach, ScheduleSlot, UserProfile, Workout, WorkoutPhase, WorkoutSession
+from .models import (
+    Coach,
+    ScheduleBooking,
+    ScheduleSlot,
+    UserProfile,
+    Workout,
+    WorkoutPhase,
+    WorkoutSession,
+)
 from .tokens import (
     get_user_from_refresh_token,
     issue_access_token,
@@ -246,10 +254,12 @@ class ScheduleSessionSerializer(serializers.ModelSerializer):
     coach = serializers.CharField(source="coach.name")
     workout_slug = serializers.CharField(source="workout.slug")
     workout_category = serializers.CharField(source="workout.category")
+    is_booked = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = ScheduleSlot
         fields = [
+            "id",
             "time",
             "title",
             "meta",
@@ -258,6 +268,7 @@ class ScheduleSessionSerializer(serializers.ModelSerializer):
             "status",
             "workout_slug",
             "workout_category",
+            "is_booked",
         ]
 
 
@@ -325,6 +336,38 @@ class ScheduleDaySerializer(serializers.Serializer):
 
 class ScheduleResponseSerializer(serializers.Serializer):
     days = ScheduleDaySerializer(many=True)
+
+
+class ScheduleBookingSerializer(serializers.Serializer):
+    slot_id = serializers.IntegerField(write_only=True)
+    booking_id = serializers.IntegerField(read_only=True)
+    created = serializers.BooleanField(read_only=True)
+    is_booked = serializers.BooleanField(read_only=True)
+    message = serializers.CharField(read_only=True)
+
+    def validate_slot_id(self, value):
+        slot = ScheduleSlot.objects.filter(pk=value).first()
+        if slot is None:
+            raise serializers.ValidationError("Слот расписания не найден.")
+
+        if "заполнено" in slot.status.lower():
+            raise serializers.ValidationError("Этот слот уже заполнен.")
+
+        self.context["slot"] = slot
+        return value
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        slot = self.context["slot"]
+        booking, created = ScheduleBooking.objects.get_or_create(user=user, slot=slot)
+
+        return {
+            "slot_id": slot.id,
+            "booking_id": booking.id,
+            "created": created,
+            "is_booked": True,
+            "message": "Запись подтверждена." if created else "Вы уже записаны на эту тренировку.",
+        }
 
 
 class WorkoutDaySerializer(serializers.Serializer):

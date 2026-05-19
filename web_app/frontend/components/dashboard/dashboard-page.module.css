@@ -339,6 +339,14 @@
   margin-top: 8px;
 }
 
+.sessionCard .primaryAction,
+.sessionCard .secondaryAction {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 14px;
+  padding: 0 14px;
+}
+
 .scheduleDay {
   display: flex;
   flex-direction: column;

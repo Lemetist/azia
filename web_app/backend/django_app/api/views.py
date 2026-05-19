@@ -47,6 +47,7 @@ except ModuleNotFoundError:
 
 from .serializers import (
     DashboardSummarySerializer,
+    ScheduleBookingSerializer,
     ScheduleResponseSerializer,
     ScheduleSessionSerializer,
     CustomTokenObtainPairSerializer,
@@ -64,7 +65,7 @@ from .serializers import (
     TokenRefreshResponseSerializer,
     UserSerializer,
 )
-from .models import ScheduleSlot, Workout, WorkoutPhase
+from .models import ScheduleBooking, ScheduleSlot, Workout, WorkoutPhase
 
 
 @extend_schema(
@@ -215,9 +216,12 @@ def _build_dashboard_summary(user):
     return DashboardSummarySerializer(response).data
 
 
-def _build_schedule_response():
+def _build_schedule_response(user):
     slots = list(
         ScheduleSlot.objects.select_related("coach", "workout").order_by("position")
+    )
+    booked_slot_ids = set(
+        ScheduleBooking.objects.filter(user=user, slot__in=slots).values_list("slot_id", flat=True)
     )
 
     grouped_days: OrderedDict[str, dict] = OrderedDict()
@@ -234,6 +238,7 @@ def _build_schedule_response():
 
         grouped_days[slot.day_id]["sessions"].append(
             {
+                "id": slot.id,
                 "time": slot.time,
                 "title": slot.title,
                 "meta": slot.meta,
@@ -242,6 +247,7 @@ def _build_schedule_response():
                 "status": slot.status,
                 "workout_slug": slot.workout.slug,
                 "workout_category": slot.workout.category,
+                "is_booked": slot.id in booked_slot_ids,
             }
         )
 
@@ -319,8 +325,23 @@ def dashboard_summary(request):
 )
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def schedule(_request):
-    return Response(_build_schedule_response())
+def schedule(request):
+    return Response(_build_schedule_response(request.user))
+
+
+@extend_schema(
+    description="Записать текущего пользователя на слот расписания.",
+    request=ScheduleBookingSerializer,
+    responses={201: ScheduleBookingSerializer, 200: ScheduleBookingSerializer},
+)
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def book_schedule_slot(request):
+    serializer = ScheduleBookingSerializer(data=request.data, context={"request": request})
+    serializer.is_valid(raise_exception=True)
+    payload = serializer.save()
+    status_code = status.HTTP_201_CREATED if payload["created"] else status.HTTP_200_OK
+    return Response(payload, status=status_code)
 
 
 @extend_schema(

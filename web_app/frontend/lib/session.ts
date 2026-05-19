@@ -77,6 +77,14 @@ type WorkoutCompletionPayload = {
   last_completed_at: string;
 };
 
+type ScheduleBookingPayload = {
+  slot_id: number;
+  booking_id: number;
+  created: boolean;
+  is_booked: boolean;
+  message: string;
+};
+
 const ACCESS_KEY = "access";
 const REFRESH_KEY = "refresh";
 const USER_KEY = "me";
@@ -411,4 +419,12 @@ export async function completeWorkoutSession(
       elapsed_seconds: Math.max(1, Math.floor(elapsedSeconds)),
     }),
   })) as WorkoutCompletionPayload;
+}
+
+export async function bookScheduleSlot(slotId: number): Promise<ScheduleBookingPayload> {
+  return (await fetchSessionJson("/schedule/book", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ slot_id: slotId }),
+  })) as ScheduleBookingPayload;
 }

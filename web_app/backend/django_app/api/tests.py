@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import WorkoutSession
+from .models import ScheduleBooking, WorkoutSession
 
 
 class AuthApiTests(APITestCase):
@@ -269,8 +269,56 @@ class AuthApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(response.data["days"]), 7)
         self.assertIn("sessions", response.data["days"][0])
+        self.assertIn("id", response.data["days"][0]["sessions"][0])
         self.assertIn("workout_slug", response.data["days"][0]["sessions"][0])
         self.assertIn("workout_category", response.data["days"][0]["sessions"][0])
+        self.assertIn("is_booked", response.data["days"][0]["sessions"][0])
+
+    def test_book_schedule_slot_creates_booking_and_marks_schedule(self):
+        self.client.force_authenticate(user=self.user)
+        schedule_response = self.client.get("/api/schedule/")
+        slot_id = schedule_response.data["days"][0]["sessions"][0]["id"]
+
+        booking_response = self.client.post(
+            "/api/schedule/book/",
+            {"slot_id": slot_id},
+            format="json",
+        )
+
+        self.assertEqual(booking_response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(booking_response.data["slot_id"], slot_id)
+        self.assertTrue(booking_response.data["is_booked"])
+        self.assertEqual(ScheduleBooking.objects.filter(user=self.user, slot_id=slot_id).count(), 1)
+
+        updated_schedule = self.client.get("/api/schedule/")
+        booked_session = next(
+            session
+            for day in updated_schedule.data["days"]
+            for session in day["sessions"]
+            if session["id"] == slot_id
+        )
+        self.assertTrue(booked_session["is_booked"])
+
+    def test_book_schedule_slot_is_idempotent_for_same_user(self):
+        self.client.force_authenticate(user=self.user)
+        schedule_response = self.client.get("/api/schedule/")
+        slot_id = schedule_response.data["days"][0]["sessions"][0]["id"]
+
+        first_response = self.client.post(
+            "/api/schedule/book/",
+            {"slot_id": slot_id},
+            format="json",
+        )
+        second_response = self.client.post(
+            "/api/schedule/book/",
+            {"slot_id": slot_id},
+            format="json",
+        )
+
+        self.assertEqual(first_response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(second_response.status_code, status.HTTP_200_OK)
+        self.assertFalse(second_response.data["created"])
+        self.assertEqual(ScheduleBooking.objects.filter(user=self.user, slot_id=slot_id).count(), 1)
 
     def test_workouts_returns_catalog_with_phases_and_days(self):
         self.client.force_authenticate(user=self.user)
