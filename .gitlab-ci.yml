@@ -1,0 +1,30 @@
+image: ghcr.io/astral-sh/uv:python3.14-bookworm
+
+stages:
+  - test
+
+variables:
+  UV_CACHE_DIR: "$CI_PROJECT_DIR/.uv-cache"
+  UV_PROJECT_DIR: "$CI_PROJECT_DIR/web_app/backend/django_app"
+  DJANGO_DEBUG: "1"
+  DJANGO_SECRET_KEY: "ci-secret-key-32-chars-minimum-for-jwt"
+
+cache:
+  key:
+    files:
+      - web_app/backend/django_app/pyproject.toml
+      - web_app/backend/django_app/uv.lock
+  paths:
+    - .uv-cache/
+    - web_app/backend/django_app/.venv/
+
+before_script:
+  - cd "$UV_PROJECT_DIR"
+  - uv sync --frozen
+
+django:test:
+  stage: test
+  script:
+    - uv run python manage.py check
+    - uv run python manage.py makemigrations --check --dry-run
+    - uv run python manage.py test
