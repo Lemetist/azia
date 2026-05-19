@@ -69,15 +69,33 @@
 .brandMark {
   width: 52px;
   height: 52px;
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.24), transparent 24%),
+    linear-gradient(145deg, rgba(241, 141, 52, 0.96), rgba(143, 51, 22, 0.94));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 16px 32px rgba(219, 91, 44, 0.28);
+}
+
+.brandIconPlate {
+  width: 7px;
+  height: 25px;
+  border-radius: 999px;
+  background: #fff7ec;
+  box-shadow:
+    -5px 0 0 rgba(255, 247, 236, 0.76),
+    5px 0 0 rgba(255, 247, 236, 0.76);
+}
+
+.brandIconBar {
+  width: 18px;
+  height: 6px;
+  border-radius: 999px;
+  background: #fff7ec;
 }
 
 .brandText {
@@ -251,10 +269,10 @@
 
 .heroTitle {
   margin-top: 18px;
-  max-width: 12ch;
+  max-width: 780px;
   font-size: clamp(48px, 7vw, 84px);
-  line-height: 0.9;
-  letter-spacing: -0.06em;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
   text-transform: uppercase;
 }
 
@@ -273,8 +291,8 @@
 }
 
 .heroLead {
-  max-width: 540px;
-  margin-top: 20px;
+  max-width: 620px;
+  margin-top: 24px;
   color: rgba(255, 248, 238, 0.78);
 }
 
@@ -476,7 +494,7 @@
 }
 
 .storyCard {
-  padding: 48px;
+  padding: 56px;
   background: linear-gradient(160deg, #252b38 8%, #151820 92%);
 }
 
@@ -488,19 +506,19 @@
 }
 
 .storyCard .sectionTitle {
-  max-width: 12ch;
+  max-width: 760px;
   color: #ffffff;
 }
 
 .sectionText {
-  margin-top: 28px;
+  margin-top: 24px;
   max-width: 620px;
   color: rgba(255, 248, 238, 0.76);
 }
 
 .storyAside {
   position: relative;
-  padding: 36px;
+  padding: 44px;
   background:
     radial-gradient(circle at 80% 78%, rgba(219, 91, 44, 0.12), transparent 24%),
     linear-gradient(180deg, #fff8ef 0%, #f3eadb 100%);
@@ -517,9 +535,9 @@
 }
 
 .storyQuote {
-  max-width: 320px;
-  margin: 180px 0 0 auto;
-  padding: 24px;
+  max-width: 360px;
+  margin: 156px 0 0 auto;
+  padding: 28px;
   border-radius: 24px;
   background: #ffffff;
   color: var(--text-dark);
@@ -534,7 +552,7 @@
 .sectionIntro {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.86fr);
-  gap: 28px;
+  gap: 36px;
   align-items: end;
 }
 
@@ -558,7 +576,7 @@
 }
 
 .programCard {
-  padding: 24px;
+  padding: 28px;
   border: 1px solid var(--line-light);
   border-radius: 26px;
   background: var(--paper);
@@ -580,7 +598,7 @@
 }
 
 .programHead h3 {
-  max-width: 8ch;
+  max-width: 11ch;
   color: var(--text-dark);
   font-size: 26px;
   line-height: 1.02;
@@ -625,7 +643,7 @@
 }
 
 .workspaceCard {
-  padding: 24px;
+  padding: 28px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 26px;
   background: rgba(255, 255, 255, 0.05);
@@ -664,7 +682,7 @@
 .journeySection {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
-  gap: 26px;
+  gap: 36px;
 }
 
 .journeyPanel {
@@ -688,7 +706,7 @@
 .journeyCard {
   display: flex;
   gap: 18px;
-  padding: 22px;
+  padding: 24px;
   background: #ffffff;
 }
 
@@ -719,7 +737,7 @@
 }
 
 .ctaCard {
-  padding: 24px;
+  padding: 28px;
   background: linear-gradient(160deg, #252b38 8%, #151820 92%);
 }
 
@@ -781,7 +799,7 @@
   }
 
   .heroTitle {
-    max-width: 10ch;
+    max-width: 760px;
   }
 
   .storyCard,

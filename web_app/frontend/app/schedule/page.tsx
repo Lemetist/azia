@@ -17,6 +17,7 @@ type ScheduleSession = {
   spots: string;
   status: string;
   workout_slug: string;
+  workout_category: "strength" | "cardio" | "mobility";
 };
 
 type ScheduleDay = {
@@ -30,6 +31,26 @@ type ScheduleDay = {
 type ScheduleResponse = {
   days: ScheduleDay[];
 };
+
+function pluralizeRu(value: number, forms: [string, string, string]) {
+  const absoluteValue = Math.abs(value);
+  const lastTwoDigits = absoluteValue % 100;
+  const lastDigit = absoluteValue % 10;
+
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+    return forms[2];
+  }
+
+  if (lastDigit === 1) {
+    return forms[0];
+  }
+
+  if (lastDigit >= 2 && lastDigit <= 4) {
+    return forms[1];
+  }
+
+  return forms[2];
+}
 
 export default function SchedulePage() {
   const [days, setDays] = useState<ScheduleDay[]>([]);
@@ -75,15 +96,17 @@ export default function SchedulePage() {
 
   const summary = useMemo(() => {
     const sessions = days.flatMap((day) => day.sessions);
-    const strength = sessions.filter((item) => item.workout_slug.includes("strength") || item.workout_slug.includes("leg")).length;
-    const cardio = sessions.filter((item) => item.workout_slug.includes("pool") || item.workout_slug.includes("tempo")).length;
-    const recovery = sessions.filter((item) => item.workout_slug.includes("mobility")).length;
+    const strength = sessions.filter((item) => item.workout_category === "strength").length;
+    const cardio = sessions.filter((item) => item.workout_category === "cardio").length;
+    const recovery = sessions.filter((item) => item.workout_category === "mobility").length;
+    const firstAvailable = sessions.find((item) => !/заполнено/i.test(item.status)) ?? sessions[0];
 
     return {
       total: sessions.length,
       strength,
       cardio,
       recovery,
+      firstAvailable,
     };
   }, [days]);
 
@@ -121,21 +144,23 @@ export default function SchedulePage() {
             <div className={styles.sessionList}>
               <div className={styles.sessionCard}>
                 <div className={styles.sessionHead}>
-                  <strong>{summary.total || 0} занятий подтверждены</strong>
+                  <strong>
+                    {summary.total} {pluralizeRu(summary.total, ["занятие", "занятия", "занятий"])} подтверждено
+                  </strong>
                   <span className={styles.tag}>На этой неделе</span>
                 </div>
                 <p className={styles.sessionMeta}>
-                  {summary.strength} силовых, {summary.cardio} кондиционных, {summary.recovery} recovery-сессий
+                  {summary.strength} силовых, {summary.cardio} кардио, {summary.recovery} recovery
                 </p>
               </div>
               <div className={styles.sessionCard}>
                 <div className={styles.sessionHead}>
                   <strong>Лучший рабочий слот</strong>
-                  <span className={styles.miniTag}>{days[0]?.day ?? "Ожидание"}</span>
+                  <span className={styles.miniTag}>{summary.firstAvailable ? "Доступен" : "Ожидание"}</span>
                 </div>
                 <p className={styles.sessionMeta}>
-                  {days[0]?.sessions[0]
-                    ? `${days[0].sessions[0].time}. ${days[0].sessions[0].title}`
+                  {summary.firstAvailable
+                    ? `${summary.firstAvailable.time}. ${summary.firstAvailable.title}`
                     : "Подбираем первый доступный слот недели."}
                 </p>
               </div>
@@ -154,35 +179,86 @@ export default function SchedulePage() {
           </article>
         </div>
 
-        <section className={styles.tripleGrid} id="week-grid">
-          {days.map((day) => (
-            <article className={styles.scheduleDay} key={day.day_id}>
+        <section className={styles.scheduleGrid} id="week-grid" aria-busy={loading}>
+          {loading
+            ? Array.from({ length: 4 }, (_, index) => (
+                <article className={styles.scheduleDay} key={`loading-${index}`}>
+                  <div className={styles.dayHeader}>
+                    <div>
+                      <h3>Загрузка</h3>
+                      <p className={styles.smallMuted}>Получаем слоты недели</p>
+                    </div>
+                    <span className={styles.miniTag}>...</span>
+                  </div>
+                  <div className={styles.scheduleSessions}>
+                    <div className={styles.sessionCard}>
+                      <div className={styles.sessionHead}>
+                        <strong>--:--</strong>
+                        <span className={styles.tag}>места</span>
+                      </div>
+                      <p className={styles.sessionMeta}>Синхронизируем расписание</p>
+                    </div>
+                  </div>
+                </article>
+              ))
+            : null}
+
+          {!loading && error ? (
+            <article className={`${styles.scheduleDay} ${styles.scheduleNotice}`}>
               <div className={styles.dayHeader}>
                 <div>
-                  <h3>
-                    {day.day} · {day.date}
-                  </h3>
-                  <p className={styles.smallMuted}>{day.load}</p>
+                  <h3>Расписание недоступно</h3>
+                  <p className={styles.smallMuted}>{error}</p>
                 </div>
-                <span className={styles.miniTag}>{day.sessions.length} слота</span>
-              </div>
-
-              <div className={styles.scheduleSessions}>
-                {day.sessions.map((session) => (
-                  <div className={styles.sessionCard} key={`${day.day_id}-${session.time}-${session.title}`}>
-                    <div className={styles.sessionHead}>
-                      <strong>{session.time}</strong>
-                      <span className={styles.tag}>{session.spots}</span>
-                    </div>
-                    <p className={styles.sessionMeta}>{session.title}</p>
-                    <p className={styles.smallMuted}>{session.meta}</p>
-                    <p className={styles.smallMuted}>Тренер: {session.coach}</p>
-                    <p className={styles.listValue}>{session.status}</p>
-                  </div>
-                ))}
+                <span className={styles.statusTag}>Проблема</span>
               </div>
             </article>
-          ))}
+          ) : null}
+
+          {!loading && !error && days.length === 0 ? (
+            <article className={`${styles.scheduleDay} ${styles.scheduleNotice}`}>
+              <div className={styles.dayHeader}>
+                <div>
+                  <h3>Слотов пока нет</h3>
+                  <p className={styles.smallMuted}>Backend вернул пустую неделю.</p>
+                </div>
+                <span className={styles.miniTag}>0 слотов</span>
+              </div>
+            </article>
+          ) : null}
+
+          {!loading && !error
+            ? days.map((day) => (
+                <article className={styles.scheduleDay} key={day.day_id}>
+                  <div className={styles.dayHeader}>
+                    <div>
+                      <h3>
+                        {day.day} · {day.date}
+                      </h3>
+                      <p className={styles.smallMuted}>{day.load}</p>
+                    </div>
+                    <span className={styles.miniTag}>
+                      {day.sessions.length} {pluralizeRu(day.sessions.length, ["слот", "слота", "слотов"])}
+                    </span>
+                  </div>
+
+                  <div className={styles.scheduleSessions}>
+                    {day.sessions.map((session) => (
+                      <div className={styles.sessionCard} key={`${day.day_id}-${session.time}-${session.title}`}>
+                        <div className={styles.sessionHead}>
+                          <strong>{session.time}</strong>
+                          <span className={styles.tag}>{session.spots}</span>
+                        </div>
+                        <p className={styles.sessionMeta}>{session.title}</p>
+                        <p className={styles.smallMuted}>{session.meta}</p>
+                        <p className={styles.smallMuted}>Тренер: {session.coach}</p>
+                        <p className={styles.listValue}>{session.status}</p>
+                      </div>
+                    ))}
+                  </div>
+                </article>
+              ))
+            : null}
         </section>
       </section>
     </DashboardShell>

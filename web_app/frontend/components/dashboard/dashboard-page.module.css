@@ -24,11 +24,18 @@
 }
 
 .tripleGrid,
+.scheduleGrid,
 .coachesGrid,
 .factsGrid,
 .statGrid,
 .actionGrid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.scheduleGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 22px;
 }
 
 .plansGrid {
@@ -338,6 +345,10 @@
   gap: 16px;
 }
 
+.scheduleNotice {
+  grid-column: 1 / -1;
+}
+
 .dayHeader h3 {
   margin: 0 0 4px;
   font-size: 22px;
@@ -414,6 +425,12 @@
   gap: 14px;
 }
 
+.planCardActive {
+  border-color: rgba(122, 214, 138, 0.28);
+  background:
+    linear-gradient(180deg, rgba(122, 214, 138, 0.1), rgba(255, 255, 255, 0.03));
+}
+
 .planPrice {
   margin: 0;
   font-size: 42px;
@@ -471,6 +488,13 @@
 .primaryAction:focus-visible,
 .secondaryAction:focus-visible {
   transform: translateY(-1px);
+}
+
+.primaryAction:disabled,
+.secondaryAction:disabled {
+  cursor: default;
+  opacity: 0.64;
+  transform: none;
 }
 
 .primaryAction {
@@ -884,6 +908,7 @@
   .heroGrid,
   .doubleGrid,
   .tripleGrid,
+  .scheduleGrid,
   .coachesGrid,
   .plansGrid,
   .factsGrid,

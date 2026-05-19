@@ -21,26 +21,26 @@ const streamDetails = [
 ];
 
 const weeklyFlow = [
-  { day: "Пн", title: "Strength Forge", meta: "Низ тела · 18:30", href: "/schedule" },
-  { day: "Ср", title: "Fight Conditioning", meta: "Интервалы · 19:00", href: "/workouts" },
-  { day: "Сб", title: "Mobility Reset", meta: "Recovery · 10:15", href: "/progress" },
+  { day: "Пн", title: "Силовая база", meta: "Низ тела · 18:30", href: "/schedule" },
+  { day: "Ср", title: "Бойцовская выносливость", meta: "Интервалы · 19:00", href: "/workouts" },
+  { day: "Сб", title: "Мобилити-сброс", meta: "Восстановление · 10:15", href: "/progress" },
 ];
 
 const programCards = [
   {
-    title: "Strength Base",
+    title: "Силовая база",
     duration: "8 недель",
     description: "База силы, техника со штангой и постепенная прогрессия без перегруза.",
     href: "/assessment",
   },
   {
-    title: "Hybrid Engine",
+    title: "Гибридная выносливость",
     duration: "10 недель",
     description: "Силовые блоки, кардио и восстановление в едином недельном ритме.",
     href: "/workouts",
   },
   {
-    title: "Fight Conditioning",
+    title: "Бойцовская форма",
     duration: "6 недель",
     description: "Плотная кондиционная работа, интервалы и взрывная мощность.",
     href: "/coaches",
@@ -49,19 +49,19 @@ const programCards = [
 
 const workspaceCards = [
   {
-    title: "Workouts",
+    title: "Тренировки",
     eyebrow: "Мобильный сценарий",
     description: "Подборка тренировок, длительность, фазы сессии и быстрый запуск из одного экрана.",
     href: "/workouts",
   },
   {
-    title: "Schedule",
+    title: "Расписание",
     eyebrow: "Десктопный контроль",
     description: "Слоты, загрузка недели и быстрые записи на занятия без хаоса в календаре.",
     href: "/schedule",
   },
   {
-    title: "Progress",
+    title: "Прогресс",
     eyebrow: "Метрики",
     description: "Тренировочный объем, цели и восстановление в аналитическом формате.",
     href: "/progress",
@@ -93,7 +93,11 @@ export default function HomePage() {
         <div className={`${styles.shell} ${styles.heroShell}`}>
           <header className={styles.header}>
             <Link className={styles.brand} href="/" aria-label="Primal Training">
-              <span className={styles.brandMark}>PT</span>
+              <span className={styles.brandMark} aria-hidden="true">
+                <span className={styles.brandIconPlate} />
+                <span className={styles.brandIconBar} />
+                <span className={styles.brandIconPlate} />
+              </span>
               <span className={styles.brandText}>
                 <strong>Primal Training</strong>
                 <span>System-led fitness</span>
@@ -132,10 +136,10 @@ export default function HomePage() {
 
               <div className={styles.heroActions}>
                 <Link className={styles.primaryButton} href="/assessment">
-                  Начать assessment
+                  Начать оценку
                 </Link>
                 <Link className={styles.secondaryButton} href="/workouts">
-                  Смотреть workouts
+                  Смотреть тренировки
                 </Link>
               </div>
 
@@ -300,10 +304,10 @@ export default function HomePage() {
             </p>
             <div className={styles.ctaActions}>
               <Link className={styles.primaryButton} href="/assessment">
-                Открыть assessment
+                Открыть оценку
               </Link>
               <Link className={styles.secondaryButtonStrong} href="/schedule">
-                Смотреть schedule
+                Смотреть расписание
               </Link>
             </div>
           </div>

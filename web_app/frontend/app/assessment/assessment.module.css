@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  padding: 34px;
+  padding: 42px 34px;
   background:
     linear-gradient(135deg, rgba(250, 204, 21, 0.24), transparent 26%),
     linear-gradient(315deg, rgba(34, 211, 238, 0.18), transparent 30%),
@@ -12,7 +12,7 @@
   width: min(1180px, 100%);
   margin: 0 auto;
   display: grid;
-  gap: 24px;
+  gap: 30px;
 }
 
 .header {
@@ -20,7 +20,7 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 18px;
-  padding: 18px 0 6px;
+  padding: 12px 0 4px;
 }
 
 .header h1 {
@@ -64,7 +64,7 @@
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.75fr);
-  gap: 20px;
+  gap: 24px;
   align-items: start;
 }
 
@@ -78,15 +78,15 @@
 
 .formPanel {
   display: grid;
-  gap: 22px;
-  padding: 26px;
+  gap: 26px;
+  padding: 30px;
   border-radius: 32px;
 }
 
 .sectionHead {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
+  gap: 16px;
 }
 
 .sectionHead > span {
@@ -117,7 +117,7 @@
 
 .segmented {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -169,23 +169,30 @@
 .metricGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
 .metricControl {
-  min-height: 142px;
-  padding: 18px;
+  min-height: 166px;
+  padding: 20px;
   border-radius: 24px;
   background: #ffffff;
   border: 1px solid rgba(23, 21, 19, 0.09);
   display: grid;
-  gap: 14px;
+  gap: 18px;
 }
 
-.metricControl span {
+.metricLabel {
   color: #74695f;
   font-size: 14px;
   font-weight: 800;
+}
+
+.metricValueRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .metricControl strong {
@@ -193,20 +200,39 @@
   line-height: 1;
 }
 
-.metricControl input {
+.metricControl input[type="range"] {
   width: 100%;
   accent-color: #171513;
 }
 
+.metricNumber {
+  width: 92px;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid rgba(23, 21, 19, 0.14);
+  border-radius: 14px;
+  background: #f7f2e9;
+  color: #171513;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.metricNumber:focus {
+  outline: 2px solid rgba(163, 230, 53, 0.7);
+  outline-offset: 2px;
+}
+
 .goalGrid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
 }
 
 .goalCard {
-  min-height: 168px;
-  padding: 16px;
+  min-height: 178px;
+  padding: 18px;
   border: 1px solid rgba(23, 21, 19, 0.1);
   border-radius: 24px;
   background: #ffffff;
@@ -216,6 +242,7 @@
   align-items: flex-start;
   gap: 12px;
   text-align: left;
+  overflow-wrap: anywhere;
   font: inherit;
   cursor: pointer;
   transition:
@@ -250,13 +277,13 @@
 
 .goalCard strong {
   font-size: 17px;
-  line-height: 1.12;
+  line-height: 1.18;
 }
 
 .goalCard small {
   color: #72685f;
   font-size: 13px;
-  line-height: 1.4;
+  line-height: 1.48;
 }
 
 .goalCardActive {
@@ -274,8 +301,8 @@
   position: sticky;
   top: 24px;
   display: grid;
-  gap: 18px;
-  padding: 22px;
+  gap: 20px;
+  padding: 24px;
   border-radius: 32px;
   background:
     linear-gradient(180deg, rgba(23, 21, 19, 0.88), rgba(23, 21, 19, 0.96)),
@@ -429,7 +456,7 @@
 
   .formPanel,
   .previewPanel {
-    padding: 18px;
+    padding: 20px;
     border-radius: 24px;
   }
 

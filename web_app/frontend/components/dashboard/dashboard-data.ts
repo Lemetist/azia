@@ -1,7 +1,7 @@
 export const sidebarItems = [
   { href: "/overview", label: "Обзор", key: "overview" },
   { href: "/schedule", label: "Расписание", key: "schedule" },
-  { href: "/workouts", label: "Workouts", key: "workouts" },
+  { href: "/workouts", label: "Тренировки", key: "workouts" },
   { href: "/coaches", label: "Тренеры", key: "coaches" },
   { href: "/progress", label: "Прогресс", key: "progress" },
   { href: "/membership", label: "Абонемент", key: "membership" },
@@ -16,19 +16,19 @@ export const statCards = [
 
 export const nextWorkouts = [
   {
-    title: "Strength Forge",
+    title: "Силовая база",
     coach: "Marcus Bell",
     time: "Сегодня · 18:30",
     tag: "Низ тела",
   },
   {
-    title: "Pool Conditioning",
+    title: "Бассейн и выносливость",
     coach: "Nina Park",
     time: "Завтра · 07:15",
     tag: "45 минут",
   },
   {
-    title: "Tempo Run",
+    title: "Темповый бег",
     coach: "Arseniy Volk",
     time: "Чт · 06:45",
     tag: "8 км",
@@ -75,7 +75,7 @@ export const scheduleDays = [
       },
       {
         time: "18:30",
-        title: "Strength Forge",
+        title: "Силовая база",
         meta: "Зал A · основная силовая",
         coach: "Marcus Bell",
         spots: "4 места",
@@ -90,7 +90,7 @@ export const scheduleDays = [
     sessions: [
       {
         time: "07:15",
-        title: "Pool Conditioning",
+        title: "Бассейн и выносливость",
         meta: "Дорожка 3 · дыхание и темп",
         coach: "Nina Park",
         spots: "7 мест",
@@ -113,8 +113,8 @@ export const scheduleDays = [
     sessions: [
       {
         time: "08:00",
-        title: "Mobility Reset",
-        meta: "Recovery lounge · подвижность",
+        title: "Мобилити-сброс",
+        meta: "Зона восстановления · подвижность",
         coach: "Nina Park",
         spots: "16 мест",
         status: "Легкий блок",
@@ -136,28 +136,28 @@ export const coaches = [
     name: "Marcus Bell",
     role: "Силовой тренер",
     focus: "Гипертрофия, техника со штангой, цикл под рост силы",
-    image: "/images/gym-reference.jpg",
+    image: "/images/coach-marcus-bell.png",
     experience: "9 лет опыта",
     availability: "Свободен для 2 новых атлетов",
-    speciality: "Barbell systems",
+    speciality: "Силовая техника",
   },
   {
     name: "Nina Park",
     role: "Тренер по плаванию",
     focus: "Выносливость, контроль дыхания, темп восстановления",
-    image: "/images/gym-bg.png",
+    image: "/images/coach-nina-park.png",
     experience: "7 лет опыта",
     availability: "Свободна по утрам",
-    speciality: "Engine + recovery",
+    speciality: "Выносливость и восстановление",
   },
   {
     name: "Arseniy Volk",
     role: "Тренер по бегу",
     focus: "Пороговая работа, каденс, подготовка к забегу 10 км",
-    image: "/images/gym-reference.jpg",
+    image: "/images/coach-arseniy-volk.png",
     experience: "6 лет опыта",
     availability: "Свободен по вторникам",
-    speciality: "Running economy",
+    speciality: "Экономичность бега",
   },
 ] as const;
 
@@ -197,13 +197,15 @@ export const plans = [
     perks: ["Зал без ограничений", "8 групповых слотов", "1 ревью с тренером"],
   },
   {
-    name: "Performance+",
+    name: "Результат+",
     price: "11 900 ₽/мес.",
     description: "Расширенный план с персональным разбором, трекером и доп. окном записи.",
     status: "Рекомендуем",
     perks: ["Все из базового", "2 персональных сессии", "Разбор питания и сна"],
   },
 ] as const;
+
+export const membershipPlanStorageKey = "primal-training-membership-plan";
 
 export const membershipBenefits = [
   {

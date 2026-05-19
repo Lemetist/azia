@@ -50,6 +50,11 @@ type WorkoutCatalogResponse = {
   workouts: WorkoutItem[];
 };
 
+type WorkoutTimer = {
+  elapsedSeconds: number;
+  startedAtMs: number | null;
+};
+
 type LiveGuidance = {
   modeLabel: string;
   effortLabel: string;
@@ -67,29 +72,29 @@ const fallbackWorkoutDays: WorkoutDay[] = [
 ];
 
 const fallbackWorkoutFilters: Array<{ key: WorkoutCategory; label: string }> = [
-  { key: "strength", label: "Strength" },
-  { key: "cardio", label: "Cardio" },
-  { key: "mobility", label: "Mobility" },
+  { key: "strength", label: "Силовые" },
+  { key: "cardio", label: "Кардио" },
+  { key: "mobility", label: "Мобилити" },
 ];
 
 const fallbackWorkouts: WorkoutItem[] = [
   {
     slug: "strength-forge",
-    title: "Strength Forge",
-    list_meta: "52 min · Upper body",
+    title: "Силовая база",
+    list_meta: "52 мин · Верх тела",
     detail_meta: "Тяги, жим и плотный контроль темпа без провалов по технике.",
     description: "Силовой блок дня для верха тела с контролируемыми паузами и добивкой корпуса.",
     category: "strength",
     accent: "indigo",
-    duration: "52 min",
-    calories: "540 kcal",
-    level: "Level 04",
-    hero_eyebrow: "12-week plan",
+    duration: "52 мин",
+    calories: "540 ккал",
+    level: "Уровень 04",
+    hero_eyebrow: "12-недельный план",
     hero_lead: "Главный силовой слот недели уже собран и готов к запуску.",
     phases: [
-      { label: "Warm-up", value: "12 min", tone: "gold", width: "34%" },
-      { label: "Strength", value: "28 min", tone: "indigo", width: "82%" },
-      { label: "Mobility", value: "12 min", tone: "coral", width: "42%" },
+      { label: "Разминка", value: "12 мин", tone: "gold", width: "34%" },
+      { label: "Сила", value: "28 мин", tone: "indigo", width: "82%" },
+      { label: "Мобилити", value: "12 мин", tone: "coral", width: "42%" },
     ],
     days: ["mon", "wed"],
     completed_count: 0,
@@ -97,21 +102,21 @@ const fallbackWorkouts: WorkoutItem[] = [
   },
   {
     slug: "pool-conditioning",
-    title: "Pool Conditioning",
-    list_meta: "38 min · Cardio",
+    title: "Бассейн и выносливость",
+    list_meta: "38 мин · Кардио",
     detail_meta: "Плавание на темпе с коротким восстановлением между отрезками.",
     description: "Кардио-сессия для дыхания, ритма и разгрузки суставов после силового блока.",
     category: "cardio",
     accent: "gold",
-    duration: "38 min",
-    calories: "410 kcal",
-    level: "Level 03",
-    hero_eyebrow: "Engine reset",
+    duration: "38 мин",
+    calories: "410 ккал",
+    level: "Уровень 03",
+    hero_eyebrow: "Перезапуск выносливости",
     hero_lead: "Смена фокуса на выносливость без потери восстановительного окна.",
     phases: [
-      { label: "Prep", value: "8 min", tone: "gold", width: "26%" },
-      { label: "Intervals", value: "22 min", tone: "indigo", width: "78%" },
-      { label: "Cooldown", value: "8 min", tone: "coral", width: "30%" },
+      { label: "Подготовка", value: "8 мин", tone: "gold", width: "26%" },
+      { label: "Интервалы", value: "22 мин", tone: "indigo", width: "78%" },
+      { label: "Заминка", value: "8 мин", tone: "coral", width: "30%" },
     ],
     days: ["tue", "thu"],
     completed_count: 0,
@@ -119,21 +124,21 @@ const fallbackWorkouts: WorkoutItem[] = [
   },
   {
     slug: "mobility-reset",
-    title: "Mobility Reset",
-    list_meta: "24 min · Recovery",
+    title: "Мобилити-сброс",
+    list_meta: "24 мин · Восстановление",
     detail_meta: "Мягкая подвижность, дыхание и разгрузка после насыщенных дней.",
     description: "Короткая recovery-сессия для суставов, дыхания и снижения накопленной усталости.",
     category: "mobility",
     accent: "mint",
-    duration: "24 min",
-    calories: "140 kcal",
-    level: "Level 01",
-    hero_eyebrow: "Recovery mode",
+    duration: "24 мин",
+    calories: "140 ккал",
+    level: "Уровень 01",
+    hero_eyebrow: "Режим восстановления",
     hero_lead: "Экран восстановления, который не дает неделе развалиться на пике нагрузки.",
     phases: [
-      { label: "Breathing", value: "6 min", tone: "gold", width: "22%" },
-      { label: "Mobility", value: "14 min", tone: "coral", width: "66%" },
-      { label: "Reset", value: "4 min", tone: "indigo", width: "18%" },
+      { label: "Дыхание", value: "6 мин", tone: "gold", width: "22%" },
+      { label: "Мобилити", value: "14 мин", tone: "coral", width: "66%" },
+      { label: "Сброс", value: "4 мин", tone: "indigo", width: "18%" },
     ],
     days: ["wed", "thu"],
     completed_count: 0,
@@ -152,16 +157,35 @@ function formatElapsed(seconds: number) {
   return `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
 }
 
+function getSynchronizedElapsed(
+  timer: WorkoutTimer | undefined,
+  totalDurationSeconds: number,
+  nowMs: number,
+) {
+  if (!timer) {
+    return 0;
+  }
+
+  const elapsedFromStart = timer.startedAtMs
+    ? Math.floor((nowMs - timer.startedAtMs) / 1000)
+    : 0;
+  const elapsedSeconds = timer.elapsedSeconds + elapsedFromStart;
+
+  return totalDurationSeconds
+    ? Math.min(totalDurationSeconds, Math.max(0, elapsedSeconds))
+    : Math.max(0, elapsedSeconds);
+}
+
 function formatWorkoutCategory(category: WorkoutCategory) {
   if (category === "cardio") {
-    return "Cardio";
+    return "Кардио";
   }
 
   if (category === "mobility") {
-    return "Mobility";
+    return "Мобилити";
   }
 
-  return "Strength";
+  return "Силовая";
 }
 
 function getPhaseMinutes(phase: WorkoutPhase) {
@@ -401,13 +425,18 @@ export default function WorkoutsPage() {
   const [activeFilter, setActiveFilter] = useState<WorkoutCategory>("strength");
   const [selectedWorkoutId, setSelectedWorkoutId] = useState(fallbackWorkouts[0].slug);
   const [startedWorkoutId, setStartedWorkoutId] = useState<string | null>(null);
-  const [elapsedByWorkout, setElapsedByWorkout] = useState<Record<string, number>>({});
+  const [workoutTimers, setWorkoutTimers] = useState<Record<string, WorkoutTimer>>({});
+  const [timerNowMs, setTimerNowMs] = useState(() => Date.now());
   const [isCompletingWorkout, setIsCompletingWorkout] = useState(false);
   const [statusMessage, setStatusMessage] = useState("Выберите тренировку и запустите таймер.");
 
   const workoutDays = catalog?.days?.length ? catalog.days : fallbackWorkoutDays;
   const workoutFilters = catalog?.filters?.length ? catalog.filters : fallbackWorkoutFilters;
   const workouts = catalog?.workouts?.length ? catalog.workouts : fallbackWorkouts;
+  const workoutBySlug = useMemo(
+    () => new Map(workouts.map((workout) => [workout.slug, workout])),
+    [workouts],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -476,8 +505,13 @@ export default function WorkoutsPage() {
     workouts[0];
   const selectedDayMeta = workoutDays.find((day) => day.id === selectedDay) ?? workoutDays[0];
   const totalDurationSeconds = parseDurationMinutes(selectedWorkout.duration) * 60;
-  const elapsedSeconds = elapsedByWorkout[selectedWorkout.slug] ?? 0;
-  const isRunning = startedWorkoutId === selectedWorkout.slug;
+  const selectedTimer = workoutTimers[selectedWorkout.slug];
+  const elapsedSeconds = getSynchronizedElapsed(
+    selectedTimer,
+    totalDurationSeconds,
+    timerNowMs,
+  );
+  const isRunning = startedWorkoutId === selectedWorkout.slug && Boolean(selectedTimer?.startedAtMs);
   const hasProgress = elapsedSeconds > 0;
   const completedCount = selectedWorkout.completed_count ?? 0;
   const canRepeat = completedCount > 0;
@@ -496,9 +530,11 @@ export default function WorkoutsPage() {
     const threshold = phaseDurations.slice(0, index + 1).reduce((sum, value) => sum + value, 0);
     return elapsedSeconds < threshold;
   });
+  const displayedPhaseIndex =
+    activePhaseIndex >= 0 ? activePhaseIndex : selectedWorkout.phases.length - 1;
   const currentPhase =
     selectedWorkout.phases[
-      activePhaseIndex >= 0 ? activePhaseIndex : selectedWorkout.phases.length - 1
+      displayedPhaseIndex
     ];
   const nextPhase =
     activePhaseIndex >= 0 && activePhaseIndex < selectedWorkout.phases.length - 1
@@ -521,38 +557,121 @@ export default function WorkoutsPage() {
   });
 
   useEffect(() => {
-    if (startedWorkoutId !== selectedWorkout.slug) {
+    if (!startedWorkoutId) {
       return;
     }
 
     const intervalId = window.setInterval(() => {
-      setElapsedByWorkout((current) => {
-        const currentElapsed = current[selectedWorkout.slug] ?? 0;
-        const nextElapsed = Math.min(currentElapsed + 1, totalDurationSeconds);
+      const nowMs = Date.now();
+      setTimerNowMs(nowMs);
+      setWorkoutTimers((current) => {
+        const workout = workoutBySlug.get(startedWorkoutId);
+        const timer = current[startedWorkoutId];
 
-        if (nextElapsed >= totalDurationSeconds) {
-          setStartedWorkoutId(null);
-          setStatusMessage(`${selectedWorkout.title} завершена. Сохраните сессию в кабинет.`);
+        if (!workout || !timer?.startedAtMs) {
+          return current;
         }
 
-        return {
-          ...current,
-          [selectedWorkout.slug]: nextElapsed,
-        };
+        const totalSeconds = parseDurationMinutes(workout.duration) * 60;
+        const nextElapsed = getSynchronizedElapsed(timer, totalSeconds, nowMs);
+
+        if (totalSeconds && nextElapsed >= totalSeconds) {
+          setStartedWorkoutId(null);
+          setStatusMessage(`${workout.title} завершена. Сохраните сессию в кабинет.`);
+          return {
+            ...current,
+            [startedWorkoutId]: {
+              elapsedSeconds: totalSeconds,
+              startedAtMs: null,
+            },
+          };
+        }
+
+        return current;
       });
-    }, 1000);
+    }, 250);
 
     return () => window.clearInterval(intervalId);
-  }, [selectedWorkout.slug, selectedWorkout.title, startedWorkoutId, totalDurationSeconds]);
+  }, [startedWorkoutId, workoutBySlug]);
+
+  function getWorkoutElapsedSeconds(slug: string, nowMs = Date.now()) {
+    const workout = workoutBySlug.get(slug);
+    const totalSeconds = workout ? parseDurationMinutes(workout.duration) * 60 : 0;
+    return getSynchronizedElapsed(workoutTimers[slug], totalSeconds, nowMs);
+  }
+
+  function getPhaseProgressPercent(index: number) {
+    const phaseStart = phaseDurations
+      .slice(0, index)
+      .reduce((sum, value) => sum + value, 0);
+    const phaseDuration = phaseDurations[index] ?? 0;
+
+    if (elapsedSeconds <= phaseStart) {
+      return 0;
+    }
+
+    if (!phaseDuration) {
+      return 100;
+    }
+
+    return Math.min(100, Math.round(((elapsedSeconds - phaseStart) / phaseDuration) * 100));
+  }
 
   function toggleWorkoutStarted() {
-    const nextStarted = startedWorkoutId === selectedWorkout.slug ? null : selectedWorkout.slug;
-    setStartedWorkoutId(nextStarted);
-    setStatusMessage(
-      nextStarted
-        ? `${selectedWorkout.title} запущена. Сейчас активна фаза ${currentPhase.label}.`
-        : `${selectedWorkout.title} поставлена на паузу.`,
-    );
+    const nowMs = Date.now();
+
+    if (isRunning) {
+      const synchronizedElapsed = getWorkoutElapsedSeconds(selectedWorkout.slug, nowMs);
+      setWorkoutTimers((current) => ({
+        ...current,
+        [selectedWorkout.slug]: {
+          elapsedSeconds: synchronizedElapsed,
+          startedAtMs: null,
+        },
+      }));
+      setStartedWorkoutId(null);
+      setTimerNowMs(nowMs);
+      setStatusMessage(`${selectedWorkout.title} поставлена на паузу.`);
+      return;
+    }
+
+    setWorkoutTimers((current) => {
+      const nextTimers = { ...current };
+
+      if (startedWorkoutId && startedWorkoutId !== selectedWorkout.slug) {
+        const previousWorkout = workoutBySlug.get(startedWorkoutId);
+        const previousTotalSeconds = previousWorkout
+          ? parseDurationMinutes(previousWorkout.duration) * 60
+          : 0;
+        nextTimers[startedWorkoutId] = {
+          elapsedSeconds: getSynchronizedElapsed(
+            current[startedWorkoutId],
+            previousTotalSeconds,
+            nowMs,
+          ),
+          startedAtMs: null,
+        };
+      }
+
+      const currentElapsed = getSynchronizedElapsed(
+        current[selectedWorkout.slug],
+        totalDurationSeconds,
+        nowMs,
+      );
+
+      nextTimers[selectedWorkout.slug] = {
+        elapsedSeconds:
+          totalDurationSeconds && currentElapsed >= totalDurationSeconds
+            ? 0
+            : currentElapsed,
+        startedAtMs: nowMs,
+      };
+
+      return nextTimers;
+    });
+    setStartedWorkoutId(selectedWorkout.slug);
+    setTimerNowMs(nowMs);
+    setStatusMessage(`${selectedWorkout.title} запущена. Сейчас активна фаза ${currentPhase.label}.`);
   }
 
   function skipToNextPhase() {
@@ -564,19 +683,31 @@ export default function WorkoutsPage() {
     const nextElapsed = phaseDurations
       .slice(0, activePhaseIndex + 1)
       .reduce((sum, value) => sum + value, 0);
-    setElapsedByWorkout((current) => ({
+    const nowMs = Date.now();
+    setWorkoutTimers((current) => ({
       ...current,
-      [selectedWorkout.slug]: Math.min(totalDurationSeconds, nextElapsed),
+      [selectedWorkout.slug]: {
+        elapsedSeconds: Math.min(totalDurationSeconds, nextElapsed),
+        startedAtMs: isRunning ? nowMs : null,
+      },
     }));
+    setTimerNowMs(nowMs);
     setStatusMessage(`Переключено на фазу ${nextPhase.label}.`);
   }
 
   function resetWorkout() {
-    setStartedWorkoutId(null);
-    setElapsedByWorkout((current) => ({
+    if (startedWorkoutId === selectedWorkout.slug) {
+      setStartedWorkoutId(null);
+    }
+
+    setWorkoutTimers((current) => ({
       ...current,
-      [selectedWorkout.slug]: 0,
+      [selectedWorkout.slug]: {
+        elapsedSeconds: 0,
+        startedAtMs: null,
+      },
     }));
+    setTimerNowMs(Date.now());
     setStatusMessage(`${selectedWorkout.title} сброшена к старту.`);
   }
 
@@ -586,11 +717,16 @@ export default function WorkoutsPage() {
       return;
     }
 
-    setElapsedByWorkout((current) => ({
+    const nowMs = Date.now();
+    setWorkoutTimers((current) => ({
       ...current,
-      [selectedWorkout.slug]: 0,
+      [selectedWorkout.slug]: {
+        elapsedSeconds: 0,
+        startedAtMs: nowMs,
+      },
     }));
     setStartedWorkoutId(selectedWorkout.slug);
+    setTimerNowMs(nowMs);
     setStatusMessage(`Повтор ${selectedWorkout.title} запущен.`);
   }
 
@@ -604,9 +740,21 @@ export default function WorkoutsPage() {
       return;
     }
 
+    const synchronizedElapsed = getWorkoutElapsedSeconds(selectedWorkout.slug);
+    setWorkoutTimers((current) => ({
+      ...current,
+      [selectedWorkout.slug]: {
+        elapsedSeconds: synchronizedElapsed,
+        startedAtMs: null,
+      },
+    }));
+    setStartedWorkoutId((current) =>
+      current === selectedWorkout.slug ? null : current,
+    );
+
     setIsCompletingWorkout(true);
     try {
-      const result = await completeWorkoutSession(selectedWorkout.slug, elapsedSeconds);
+      const result = await completeWorkoutSession(selectedWorkout.slug, synchronizedElapsed);
       setCatalog((current) => {
         if (!current) {
           return current;
@@ -640,7 +788,7 @@ export default function WorkoutsPage() {
   return (
     <DashboardShell
       active="workouts"
-      title="Workouts"
+      title="Тренировки"
       subtitle="Каталог тренировок с фильтрами, фазами, таймером сессии и сохранением в рабочий список."
       actions={
         <Link className={styles.secondaryAction} href="/schedule">
@@ -712,7 +860,7 @@ export default function WorkoutsPage() {
           <aside className={styles.listPanel}>
             <div className={styles.panelHead}>
               <div>
-                <p className={styles.kicker}>Catalog</p>
+                <p className={styles.kicker}>Каталог</p>
                 <h3>Доступные тренировки</h3>
               </div>
               <span>{visibleWorkouts.length}</span>
@@ -745,7 +893,7 @@ export default function WorkoutsPage() {
           <article className={styles.sessionPanel}>
             <div className={styles.sessionTop}>
               <div>
-                <p className={styles.kicker}>Session</p>
+                <p className={styles.kicker}>Сессия</p>
                 <h3>{selectedWorkout.title}</h3>
                 <p>{selectedWorkout.detail_meta}</p>
               </div>
@@ -768,7 +916,7 @@ export default function WorkoutsPage() {
 
             <section className={styles.liveModelCard}>
               <div className={styles.liveModelHead}>
-                <p className={styles.liveModelLabel}>Live model</p>
+                <p className={styles.liveModelLabel}>Живая подсказка</p>
                 <span>{liveGuidance.effortLabel}</span>
               </div>
               <div className={styles.coachDemoStage}>
@@ -855,7 +1003,7 @@ export default function WorkoutsPage() {
           <aside className={styles.phasePanel}>
             <div className={styles.panelHead}>
               <div>
-                <p className={styles.kicker}>Plan</p>
+                <p className={styles.kicker}>План</p>
                 <h3>Фазы тренировки</h3>
               </div>
               <span>{selectedWorkout.calories}</span>
@@ -864,7 +1012,7 @@ export default function WorkoutsPage() {
             <div className={styles.phaseList}>
               {selectedWorkout.phases.map((phase, index) => (
                 <div
-                  className={index === activePhaseIndex ? styles.phaseActive : styles.phaseCard}
+                  className={index === displayedPhaseIndex ? styles.phaseActive : styles.phaseCard}
                   key={`${selectedWorkout.slug}-${phase.label}`}
                 >
                   <div className={styles.phaseHead}>
@@ -875,14 +1023,14 @@ export default function WorkoutsPage() {
                     </div>
                   </div>
                   <div className={styles.phaseTrack}>
-                    <span style={{ width: index < activePhaseIndex ? "100%" : phase.width }} />
+                    <span style={{ width: `${getPhaseProgressPercent(index)}%` }} />
                   </div>
                 </div>
               ))}
             </div>
 
             <div className={styles.coachCue}>
-              <span>Coach cue</span>
+              <span>Подсказка тренера</span>
               <p>
                 {nextPhase
                   ? `Держите текущую фазу ${currentPhase.label.toLowerCase()}, затем переходите к ${nextPhase.label.toLowerCase()}.`

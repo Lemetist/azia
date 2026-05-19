@@ -5,14 +5,31 @@ import { useEffect, useState } from "react";
 
 import DashboardShell from "../../components/dashboard/DashboardShell";
 import ProfileIdentityCard from "../../components/dashboard/ProfileIdentityCard";
-import { profilePreferences } from "../../components/dashboard/dashboard-data";
+import {
+  membershipPlanStorageKey,
+  plans,
+  profilePreferences,
+} from "../../components/dashboard/dashboard-data";
 import { ensureSessionUser, type SessionUser } from "../../lib/session";
 import styles from "../../components/dashboard/dashboard-page.module.css";
 
 export const dynamic = "force-dynamic";
 
+function formatProfileMetric(value: string, unit: string) {
+  const numericValue = Number(value);
+
+  if (!Number.isFinite(numericValue)) {
+    return `${value} ${unit}`;
+  }
+
+  return `${new Intl.NumberFormat("ru-RU", {
+    maximumFractionDigits: 1,
+  }).format(numericValue)} ${unit}`;
+}
+
 export default function ProfilePage() {
   const [user, setUser] = useState<SessionUser | null>(null);
+  const [membershipPlanName, setMembershipPlanName] = useState<string>(plans[0].name);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,12 +55,26 @@ export default function ProfilePage() {
     };
   }, []);
 
+  useEffect(() => {
+    const storedPlanName = window.localStorage.getItem(membershipPlanStorageKey);
+
+    if (storedPlanName && plans.some((plan) => plan.name === storedPlanName)) {
+      setMembershipPlanName(storedPlanName);
+    }
+  }, []);
+
   const profile = user?.profile;
   const profileFacts = profile
     ? [
         { label: "Цель", value: profile.goal_label },
         { label: "Анкета", value: `${profile.sex_label}, ${profile.age} лет` },
-        { label: "Параметры", value: `${profile.height_cm} см · ${profile.weight_kg} кг` },
+        {
+          label: "Параметры",
+          value: `${formatProfileMetric(profile.height_cm, "см")} · ${formatProfileMetric(
+            profile.weight_kg,
+            "кг",
+          )}`,
+        },
       ]
     : [
         { label: "Цель", value: "Анкета еще не заполнена" },
@@ -76,7 +107,7 @@ export default function ProfilePage() {
                   <strong>Абонемент активен</strong>
                   <span className={styles.statusTag}>OK</span>
                 </div>
-                <p className={styles.sessionMeta}>Тариф «Элитный доступ», автопродление включено.</p>
+                <p className={styles.sessionMeta}>Тариф «{membershipPlanName}», автопродление включено.</p>
               </div>
               <div className={styles.sessionCard}>
                 <div className={styles.sessionHead}>

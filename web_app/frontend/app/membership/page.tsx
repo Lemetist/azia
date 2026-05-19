@@ -1,12 +1,39 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 
 import DashboardShell from "../../components/dashboard/DashboardShell";
-import { membershipBenefits, plans } from "../../components/dashboard/dashboard-data";
+import {
+  membershipBenefits,
+  membershipPlanStorageKey,
+  plans,
+} from "../../components/dashboard/dashboard-data";
 import styles from "../../components/dashboard/dashboard-page.module.css";
 
 export const dynamic = "force-dynamic";
 
 export default function MembershipPage() {
+  const defaultPlanName = plans.find((plan) => plan.status === "Текущий тариф")?.name ?? plans[0].name;
+  const [selectedPlanName, setSelectedPlanName] = useState<string>(defaultPlanName);
+  const selectedPlan = useMemo(
+    () => plans.find((plan) => plan.name === selectedPlanName) ?? plans[0],
+    [selectedPlanName],
+  );
+
+  useEffect(() => {
+    const storedPlanName = window.localStorage.getItem(membershipPlanStorageKey);
+
+    if (storedPlanName && plans.some((plan) => plan.name === storedPlanName)) {
+      setSelectedPlanName(storedPlanName);
+    }
+  }, []);
+
+  function selectPlan(planName: string) {
+    setSelectedPlanName(planName);
+    window.localStorage.setItem(membershipPlanStorageKey, planName);
+  }
+
   return (
     <DashboardShell
       active="membership"
@@ -20,9 +47,17 @@ export default function MembershipPage() {
     >
       <section className={styles.stack}>
         <div className={styles.plansGrid} id="plans">
-          {plans.map((plan) => (
-            <article className={styles.planCard} key={plan.name}>
-              <p className={styles.tag}>{plan.status}</p>
+          {plans.map((plan) => {
+            const isCurrentPlan = plan.name === selectedPlanName;
+
+            return (
+            <article
+              className={`${styles.planCard} ${isCurrentPlan ? styles.planCardActive : ""}`}
+              key={plan.name}
+            >
+              <p className={isCurrentPlan ? styles.statusTag : styles.tag}>
+                {isCurrentPlan ? "Текущий тариф" : plan.status}
+              </p>
               <h3>{plan.name}</h3>
               <p className={styles.planPrice}>{plan.price}</p>
               <p className={styles.planDescription}>{plan.description}</p>
@@ -34,18 +69,21 @@ export default function MembershipPage() {
                 ))}
               </div>
               <div className={styles.heroActions}>
-                <Link
+                <button
                   className={styles.primaryAction}
-                  href={plan.status === "Текущий тариф" ? "/profile" : "/coaches"}
+                  type="button"
+                  disabled={isCurrentPlan}
+                  onClick={() => selectPlan(plan.name)}
                 >
-                  {plan.status === "Текущий тариф" ? "Открыть профиль" : "Подобрать тренера"}
-                </Link>
+                  {isCurrentPlan ? "Выбран" : "Выбрать тариф"}
+                </button>
                 <Link className={styles.secondaryAction} href="#benefits">
                   Подробнее
                 </Link>
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
 
         <div className={styles.doubleGrid}>
@@ -64,10 +102,10 @@ export default function MembershipPage() {
           <article className={styles.mediaPanel}>
             <div className={styles.mediaContent}>
               <p className={styles.tag}>Продление</p>
-              <h3>Не теряйте ритм между циклами.</h3>
+              <h3>Активен тариф {selectedPlan.name}.</h3>
               <p>
-                Автопродление включено. Следующее списание запланировано на 12 апреля
-                2026, а при переходе на Performance+ окно бронирования откроется раньше.
+                {selectedPlan.price} Следующее списание запланировано на 12 апреля
+                2026. Изменение тарифа применяется сразу в кабинете и профиле.
               </p>
             </div>
           </article>

@@ -7,6 +7,7 @@ import {
   clearSession,
   ensureSessionUser,
   saveAssessment,
+  SessionError,
   type UserGoal,
   type UserSex,
 } from "../../lib/session";
@@ -15,7 +16,6 @@ import styles from "./assessment.module.css";
 const sexOptions: Array<{ value: UserSex; label: string; marker: string }> = [
   { value: "male", label: "Мужской", marker: "M" },
   { value: "female", label: "Женский", marker: "F" },
-  { value: "other", label: "Другой", marker: "X" },
 ];
 
 const goalOptions: Array<{
@@ -79,6 +79,31 @@ const goalPlanCopy: Record<UserGoal, { nutrition: string; workout: string }> = {
   },
 };
 
+function clampMetric(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function formatMetric(value: number) {
+  return Number.isInteger(value) ? String(value) : String(value).replace(/\.0$/, "");
+}
+
+function normalizeMetricInput(
+  value: string,
+  fallback: number,
+  min: number,
+  max: number,
+  shouldRound = false,
+) {
+  const parsedValue = Number(value);
+
+  if (!Number.isFinite(parsedValue)) {
+    return fallback;
+  }
+
+  const normalizedValue = shouldRound ? Math.round(parsedValue) : parsedValue;
+  return clampMetric(normalizedValue, min, max);
+}
+
 export default function AssessmentPage() {
   const router = useRouter();
   const [sex, setSex] = useState<UserSex>("male");
@@ -86,6 +111,9 @@ export default function AssessmentPage() {
   const [age, setAge] = useState(32);
   const [heightCm, setHeightCm] = useState(178);
   const [weightKg, setWeightKg] = useState(78);
+  const [ageInput, setAgeInput] = useState("32");
+  const [heightInput, setHeightInput] = useState("178");
+  const [weightInput, setWeightInput] = useState("78");
   const [loading, setLoading] = useState(false);
   const [pageReady, setPageReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -103,16 +131,27 @@ export default function AssessmentPage() {
         if (user.profile) {
           setSex(user.profile.sex);
           setGoal(user.profile.goal);
-          setAge(user.profile.age);
-          setHeightCm(Number(user.profile.height_cm));
-          setWeightKg(Number(user.profile.weight_kg));
+          const nextAge = user.profile.age;
+          const nextHeight = Number(user.profile.height_cm);
+          const nextWeight = Number(user.profile.weight_kg);
+
+          setAge(nextAge);
+          setHeightCm(nextHeight);
+          setWeightKg(nextWeight);
+          setAgeInput(formatMetric(nextAge));
+          setHeightInput(formatMetric(nextHeight));
+          setWeightInput(formatMetric(nextWeight));
         }
 
         setPageReady(true);
-      } catch {
+      } catch (currentError) {
         clearSession();
         if (!cancelled) {
-          router.replace("/auth/login");
+          router.replace(
+            currentError instanceof SessionError && currentError.code === "AUTH_REQUIRED"
+              ? "/auth/register"
+              : "/auth/login",
+          );
         }
       }
     }
@@ -143,8 +182,25 @@ export default function AssessmentPage() {
     setError(null);
     setLoading(true);
 
+    const nextAge = normalizeMetricInput(ageInput, age, 12, 90, true);
+    const nextHeight = normalizeMetricInput(heightInput, heightCm, 120, 230, true);
+    const nextWeight = normalizeMetricInput(weightInput, weightKg, 35, 250);
+
+    setAge(nextAge);
+    setHeightCm(nextHeight);
+    setWeightKg(nextWeight);
+    setAgeInput(formatMetric(nextAge));
+    setHeightInput(formatMetric(nextHeight));
+    setWeightInput(formatMetric(nextWeight));
+
     try {
-      await saveAssessment({ sex, age, heightCm, weightKg, goal });
+      await saveAssessment({
+        sex,
+        age: nextAge,
+        heightCm: nextHeight,
+        weightKg: nextWeight,
+        goal,
+      });
       router.push("/overview");
       router.refresh();
     } catch (currentError) {
@@ -174,7 +230,7 @@ export default function AssessmentPage() {
       <section className={styles.shell}>
         <header className={styles.header}>
           <div>
-            <p className={styles.kicker}>Personal setup</p>
+            <p className={styles.kicker}>Персональная настройка</p>
             <h1>Соберем план под тебя</h1>
           </div>
           <div className={styles.progressBadge}>
@@ -209,38 +265,129 @@ export default function AssessmentPage() {
 
             <div className={styles.metricGrid}>
               <label className={styles.metricControl}>
-                <span>Возраст</span>
-                <strong>{age} лет</strong>
+                <span className={styles.metricLabel}>Возраст</span>
+                <div className={styles.metricValueRow}>
+                  <strong>{age} лет</strong>
+                  <input
+                    className={styles.metricNumber}
+                    type="number"
+                    min={12}
+                    max={90}
+                    step={1}
+                    inputMode="numeric"
+                    value={ageInput}
+                    onChange={(event) => {
+                      const nextValue = event.target.value;
+                      setAgeInput(nextValue);
+
+                      if (nextValue) {
+                        const nextAge = normalizeMetricInput(nextValue, age, 12, 90, true);
+                        setAge(nextAge);
+                      }
+                    }}
+                    onBlur={() => {
+                      const nextAge = normalizeMetricInput(ageInput, age, 12, 90, true);
+                      setAge(nextAge);
+                      setAgeInput(formatMetric(nextAge));
+                    }}
+                    aria-label="Возраст числом"
+                  />
+                </div>
                 <input
                   type="range"
                   min={12}
                   max={90}
                   value={age}
-                  onChange={(event) => setAge(Number(event.target.value))}
+                  onChange={(event) => {
+                    const nextAge = Number(event.target.value);
+                    setAge(nextAge);
+                    setAgeInput(formatMetric(nextAge));
+                  }}
                 />
               </label>
 
               <label className={styles.metricControl}>
-                <span>Рост</span>
-                <strong>{heightCm} см</strong>
+                <span className={styles.metricLabel}>Рост</span>
+                <div className={styles.metricValueRow}>
+                  <strong>{heightCm} см</strong>
+                  <input
+                    className={styles.metricNumber}
+                    type="number"
+                    min={120}
+                    max={230}
+                    step={1}
+                    inputMode="numeric"
+                    value={heightInput}
+                    onChange={(event) => {
+                      const nextValue = event.target.value;
+                      setHeightInput(nextValue);
+
+                      if (nextValue) {
+                        const nextHeight = normalizeMetricInput(nextValue, heightCm, 120, 230, true);
+                        setHeightCm(nextHeight);
+                      }
+                    }}
+                    onBlur={() => {
+                      const nextHeight = normalizeMetricInput(heightInput, heightCm, 120, 230, true);
+                      setHeightCm(nextHeight);
+                      setHeightInput(formatMetric(nextHeight));
+                    }}
+                    aria-label="Рост числом"
+                  />
+                </div>
                 <input
                   type="range"
                   min={120}
                   max={230}
                   value={heightCm}
-                  onChange={(event) => setHeightCm(Number(event.target.value))}
+                  onChange={(event) => {
+                    const nextHeight = Number(event.target.value);
+                    setHeightCm(nextHeight);
+                    setHeightInput(formatMetric(nextHeight));
+                  }}
                 />
               </label>
 
               <label className={styles.metricControl}>
-                <span>Вес</span>
-                <strong>{weightKg} кг</strong>
+                <span className={styles.metricLabel}>Вес</span>
+                <div className={styles.metricValueRow}>
+                  <strong>{weightKg} кг</strong>
+                  <input
+                    className={styles.metricNumber}
+                    type="number"
+                    min={35}
+                    max={250}
+                    step={0.5}
+                    inputMode="decimal"
+                    value={weightInput}
+                    onChange={(event) => {
+                      const nextValue = event.target.value;
+                      setWeightInput(nextValue);
+
+                      if (nextValue) {
+                        const nextWeight = normalizeMetricInput(nextValue, weightKg, 35, 250);
+                        setWeightKg(nextWeight);
+                      }
+                    }}
+                    onBlur={() => {
+                      const nextWeight = normalizeMetricInput(weightInput, weightKg, 35, 250);
+                      setWeightKg(nextWeight);
+                      setWeightInput(formatMetric(nextWeight));
+                    }}
+                    aria-label="Вес числом"
+                  />
+                </div>
                 <input
                   type="range"
                   min={35}
                   max={250}
+                  step={0.5}
                   value={weightKg}
-                  onChange={(event) => setWeightKg(Number(event.target.value))}
+                  onChange={(event) => {
+                    const nextWeight = Number(event.target.value);
+                    setWeightKg(nextWeight);
+                    setWeightInput(formatMetric(nextWeight));
+                  }}
                 />
               </label>
             </div>
@@ -276,7 +423,7 @@ export default function AssessmentPage() {
 
           <aside className={styles.previewPanel}>
             <div className={styles.previewHero}>
-              <p className={styles.kicker}>Live preview</p>
+              <p className={styles.kicker}>Предпросмотр</p>
               <h2>{preview.selectedGoal.label}</h2>
               <p>{preview.selectedGoal.summary}</p>
             </div>
@@ -293,7 +440,7 @@ export default function AssessmentPage() {
 
             <div className={styles.previewList}>
               <div>
-                <span>BMI</span>
+                <span>ИМТ</span>
                 <strong>{preview.bmi}</strong>
               </div>
               <div>

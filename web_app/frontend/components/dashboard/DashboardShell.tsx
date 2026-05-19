@@ -79,7 +79,7 @@ export default function DashboardShell({
       <main className={styles.page}>
         <section className={styles.loadingState}>
           <div className={styles.loadingCard}>
-            <p className={styles.kicker}>Member workspace</p>
+            <p className={styles.kicker}>Кабинет участника</p>
             <h1 className={styles.loadingTitle}>Подключаем кабинет</h1>
             <p className={styles.loadingText}>
               Проверяем сессию пользователя и восстанавливаем доступ к рабочим экранам.
@@ -97,8 +97,8 @@ export default function DashboardShell({
           <Link className={styles.brandLink} href="/overview">
             <span className={styles.brandMark}>PT</span>
             <div>
-              <p className={styles.kicker}>Member workspace</p>
-              <h1 className={styles.brand}>Primal Training Club</h1>
+              <p className={styles.kicker}>Кабинет участника</p>
+              <h1 className={styles.brand}>Клуб Primal Training</h1>
             </div>
           </Link>
           <p className={styles.brandLead}>
