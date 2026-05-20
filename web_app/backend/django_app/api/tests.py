@@ -1,8 +1,87 @@
 from django.contrib.auth.models import User
+from django.contrib import admin
+from django.test import Client, override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
+from unittest.mock import patch
 
-from .models import ScheduleBooking, WorkoutSession
+from .models import (
+    Coach,
+    ScheduleBooking,
+    ScheduleSlot,
+    UserProfile,
+    Workout,
+    WorkoutPhase,
+    WorkoutSession,
+)
+
+
+class AdminConfigurationTests(APITestCase):
+    def setUp(self):
+        super().setUp()
+        self.admin_user = User.objects.create_superuser(
+            username="admin@example.com",
+            email="admin@example.com",
+            password="strongpass123",
+        )
+        self.admin_client = Client()
+        self.admin_client.force_login(self.admin_user)
+
+    def test_domain_models_are_registered_in_admin(self):
+        for model in (
+            UserProfile,
+            Coach,
+            Workout,
+            WorkoutPhase,
+            ScheduleSlot,
+            ScheduleBooking,
+            WorkoutSession,
+        ):
+            self.assertIn(model, admin.site._registry)
+
+    def test_user_admin_includes_profile_inline(self):
+        user_admin = admin.site._registry[User]
+
+        self.assertTrue(
+            any(inline.model is UserProfile for inline in user_admin.inlines)
+        )
+
+    def test_domain_admin_changelists_render(self):
+        for model in (
+            UserProfile,
+            Coach,
+            Workout,
+            WorkoutPhase,
+            ScheduleSlot,
+            ScheduleBooking,
+            WorkoutSession,
+        ):
+            opts = model._meta
+            response = self.admin_client.get(
+                f"/admin/{opts.app_label}/{opts.model_name}/"
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_schedule_slot_admin_shows_booked_members(self):
+        member = User.objects.create_user(
+            username="member@example.com",
+            email="member@example.com",
+            first_name="Ivan",
+            last_name="Member",
+            password="strongpass123",
+        )
+        slot = ScheduleSlot.objects.first()
+        ScheduleBooking.objects.create(user=member, slot=slot)
+
+        changelist_response = self.admin_client.get("/admin/api/scheduleslot/")
+        change_response = self.admin_client.get(
+            f"/admin/api/scheduleslot/{slot.pk}/change/"
+        )
+
+        self.assertContains(changelist_response, "Ivan Member")
+        self.assertContains(change_response, "Ivan Member")
+        self.assertContains(change_response, "member@example.com")
 
 
 class AuthApiTests(APITestCase):
