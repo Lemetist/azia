@@ -357,6 +357,23 @@ export async function loginWithCredentials(
   return user;
 }
 
+export async function loginWithGoogleCredential(idToken: string): Promise<SessionUser> {
+  const data = (await fetchJson(`${getApiBase()}/auth/google`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id_token: idToken }),
+  })) as TokenPayload;
+
+  if (!data.access || !data.refresh) {
+    throw new Error("Не удалось получить токены доступа через Google.");
+  }
+
+  persistTokens(data.access, data.refresh);
+  const user = await fetchSessionUser(data.access);
+  persistUser(user);
+  return user;
+}
+
 export async function registerWithCredentials(payload: RegistrationPayload): Promise<SessionUser> {
   const normalizedEmail = payload.email.trim().toLowerCase();
 

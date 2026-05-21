@@ -1,7 +1,11 @@
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import urlopen
 
 from .models import (
     Coach,
@@ -182,6 +186,82 @@ class TokenRefreshSerializer(serializers.Serializer):
     def validate(self, attrs):
         user = get_user_from_refresh_token(attrs["refresh"])
         return {"access": issue_access_token(user)}
+
+
+def verify_google_id_token(id_token: str) -> dict:
+    if not settings.GOOGLE_OAUTH_CLIENT_ID:
+        raise serializers.ValidationError("Google авторизация не настроена на сервере.")
+
+    url = "https://oauth2.googleapis.com/tokeninfo?" + urlencode({"id_token": id_token})
+
+    try:
+        with urlopen(url, timeout=5) as response:
+            payload = response.read().decode("utf-8")
+    except HTTPError as exc:
+        raise serializers.ValidationError("Google не подтвердил токен авторизации.") from exc
+    except URLError as exc:
+        raise serializers.ValidationError("Не удалось связаться с Google для проверки токена.") from exc
+
+    try:
+        import json
+
+        data = json.loads(payload)
+    except ValueError as exc:
+        raise serializers.ValidationError("Google вернул некорректный ответ.") from exc
+
+    if data.get("aud") != settings.GOOGLE_OAUTH_CLIENT_ID:
+        raise serializers.ValidationError("Google token выпущен для другого приложения.")
+
+    if str(data.get("email_verified", "")).lower() != "true":
+        raise serializers.ValidationError("Google email не подтвержден.")
+
+    if not data.get("email"):
+        raise serializers.ValidationError("Google не вернул email пользователя.")
+
+    return data
+
+
+class GoogleAuthSerializer(serializers.Serializer):
+    id_token = serializers.CharField(write_only=True)
+    access = serializers.CharField(read_only=True)
+    refresh = serializers.CharField(read_only=True)
+
+    def validate_id_token(self, value):
+        self.context["google_payload"] = verify_google_id_token(value)
+        return value
+
+    def create(self, validated_data):
+        google_payload = self.context["google_payload"]
+        email = google_payload["email"].strip().lower()
+        user = (
+            User.objects.filter(username__iexact=email).first()
+            or User.objects.filter(email__iexact=email).first()
+        )
+
+        if user is None:
+            user = User(username=email, email=email)
+            user.set_unusable_password()
+
+        user.email = email
+
+        if not user.first_name and google_payload.get("given_name"):
+            user.first_name = google_payload["given_name"][:150]
+
+        if not user.last_name and google_payload.get("family_name"):
+            user.last_name = google_payload["family_name"][:150]
+
+        if not user.first_name and google_payload.get("name"):
+            name_parts = google_payload["name"].strip().split(maxsplit=1)
+            user.first_name = name_parts[0][:150]
+            if len(name_parts) > 1 and not user.last_name:
+                user.last_name = name_parts[1][:150]
+
+        user.save()
+
+        return {
+            "access": issue_access_token(user),
+            "refresh": issue_refresh_token(user),
+        }
 
 
 class CoachSerializer(serializers.ModelSerializer):

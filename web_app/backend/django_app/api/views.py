@@ -47,6 +47,7 @@ except ModuleNotFoundError:
 
 from .serializers import (
     DashboardSummarySerializer,
+    GoogleAuthSerializer,
     ScheduleBookingSerializer,
     ScheduleResponseSerializer,
     ScheduleSessionSerializer,
@@ -110,6 +111,19 @@ def register(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema(
+    request=GoogleAuthSerializer,
+    responses={200: TokenPairResponseSerializer, 400: OpenApiResponse(response={"type": "object"})},
+    description="Авторизация через Google ID token. Возвращает access + refresh токены приложения.",
+)
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def google_auth(request):
+    serializer = GoogleAuthSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    return Response(serializer.save(), status=status.HTTP_200_OK)
 
 
 @extend_schema(

@@ -180,6 +180,8 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": False,
 }
 
+GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "").strip()
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

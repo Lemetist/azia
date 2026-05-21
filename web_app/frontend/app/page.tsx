@@ -211,7 +211,7 @@ export default function HomePage() {
         <div className={styles.storyAside}>
           <span className={styles.floatingPill}>Coach-led + data-aware</span>
           <p className={styles.storyQuote}>
-            Каждый следующий экран продолжает сценарий пользователя, а не обрывает его.
+            Каждый шаг — это прогресс. Не важно, насколько медленно ты идёшь: важно, что ты не останавливаешься. 
           </p>
         </div>
       </section>

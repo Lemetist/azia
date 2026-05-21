@@ -217,6 +217,38 @@ class AuthApiTests(APITestCase):
             "Пользователь с таким email уже существует.",
         )
 
+    @override_settings(GOOGLE_OAUTH_CLIENT_ID="google-client-id.apps.googleusercontent.com")
+    @patch("api.serializers.verify_google_id_token")
+    def test_google_auth_creates_user_and_returns_tokens(self, verify_google_id_token):
+        verify_google_id_token.return_value = {
+            "aud": "google-client-id.apps.googleusercontent.com",
+            "email": "GoogleUser@Example.com",
+            "email_verified": "true",
+            "given_name": "Google",
+            "family_name": "User",
+        }
+
+        response = self.client.post(
+            "/api/auth/google/",
+            {"id_token": "valid-google-id-token"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("access", response.data)
+        self.assertIn("refresh", response.data)
+
+        user = User.objects.get(username="googleuser@example.com")
+        self.assertEqual(user.email, "googleuser@example.com")
+        self.assertEqual(user.get_full_name(), "Google User")
+        self.assertFalse(user.has_usable_password())
+
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {response.data['access']}")
+        me_response = self.client.get("/api/auth/me/")
+
+        self.assertEqual(me_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(me_response.data["email"], "googleuser@example.com")
+
     def test_me_returns_email_and_full_name_for_authenticated_user(self):
         self.client.force_authenticate(user=self.user)
 

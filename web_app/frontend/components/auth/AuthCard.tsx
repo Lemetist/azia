@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 
 import {
   type RegistrationPayload,
+  loginWithGoogleCredential,
   loginWithCredentials,
   registerWithCredentials,
 } from "../../lib/session";
@@ -39,6 +40,81 @@ type ApiLikeError = Error & {
 
 const DASHBOARD_PATH = "/overview";
 const ASSESSMENT_PATH = "/assessment";
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
+const GOOGLE_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
+
+type GoogleCredentialResponse = {
+  credential?: string;
+};
+
+type GoogleButtonText = "signin_with" | "signup_with";
+
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize(config: {
+            client_id: string;
+            callback(response: GoogleCredentialResponse): void;
+          }): void;
+          renderButton(
+            parent: HTMLElement,
+            options: {
+              theme: "outline";
+              size: "large";
+              type: "standard";
+              text: GoogleButtonText;
+              shape: "rectangular";
+              logo_alignment: "left";
+              width: string;
+            },
+          ): void;
+        };
+      };
+    };
+  }
+}
+
+let googleScriptPromise: Promise<void> | null = null;
+
+function loadGoogleIdentityScript() {
+  if (typeof window === "undefined") {
+    return Promise.reject(new Error("Google авторизация доступна только в браузере."));
+  }
+
+  if (window.google?.accounts?.id) {
+    return Promise.resolve();
+  }
+
+  if (!googleScriptPromise) {
+    googleScriptPromise = new Promise((resolve, reject) => {
+      const existingScript = document.querySelector<HTMLScriptElement>(
+        `script[src="${GOOGLE_SCRIPT_SRC}"]`,
+      );
+
+      if (existingScript) {
+        existingScript.addEventListener("load", () => resolve(), { once: true });
+        existingScript.addEventListener(
+          "error",
+          () => reject(new Error("Не удалось загрузить Google авторизацию.")),
+          { once: true },
+        );
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = GOOGLE_SCRIPT_SRC;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error("Не удалось загрузить Google авторизацию."));
+      document.head.appendChild(script);
+    });
+  }
+
+  return googleScriptPromise;
+}
 
 function MailIcon() {
   return (
@@ -240,12 +316,106 @@ export default function AuthCard({
   onRegister,
 }: AuthCardProps) {
   const router = useRouter();
+  const googleButtonRef = useRef<HTMLDivElement | null>(null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
   const [loading, setLoading] = useState(false);
+  const [googleReady, setGoogleReady] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(
+    GOOGLE_CLIENT_ID ? null : "Google авторизация не настроена.",
+  );
+
+  const handleGoogleCredential = useCallback(
+    async (response: GoogleCredentialResponse) => {
+      if (!response.credential) {
+        setFieldErrors({ form: "Google не вернул токен авторизации." });
+        setStatus("Google не вернул токен авторизации.");
+        return;
+      }
+
+      setStatus(null);
+      setFieldErrors({});
+      setLoading(true);
+
+      try {
+        const nextUser = await loginWithGoogleCredential(response.credential);
+        setStatus("Успешный вход через Google. Перенаправляем...");
+        router.push(nextUser.profile ? DASHBOARD_PATH : ASSESSMENT_PATH);
+        router.refresh();
+      } catch (error) {
+        const nextErrors = getAuthFieldErrors(error, mode);
+        setFieldErrors(nextErrors);
+        setStatus(nextErrors.form ?? "Не удалось войти через Google.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [mode, router],
+  );
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function mountGoogleButton() {
+      try {
+        await loadGoogleIdentityScript();
+
+        if (cancelled || !googleButtonRef.current || !window.google?.accounts?.id) {
+          return;
+        }
+
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: (response) => {
+            void handleGoogleCredential(response);
+          },
+        });
+
+        const buttonWidth = Math.min(
+          400,
+          Math.max(240, Math.round(googleButtonRef.current.getBoundingClientRect().width || 360)),
+        );
+
+        googleButtonRef.current.innerHTML = "";
+        window.google.accounts.id.renderButton(googleButtonRef.current, {
+          theme: "outline",
+          size: "large",
+          type: "standard",
+          text: mode === "login" ? "signin_with" : "signup_with",
+          shape: "rectangular",
+          logo_alignment: "left",
+          width: String(buttonWidth),
+        });
+
+        setGoogleReady(true);
+        setGoogleError(null);
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        setGoogleReady(false);
+        setGoogleError(
+          error instanceof Error
+            ? error.message
+            : "Не удалось подключить Google авторизацию.",
+        );
+      }
+    }
+
+    void mountGoogleButton();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [handleGoogleCredential, mode]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -391,20 +561,30 @@ export default function AuthCard({
         </button>
 
         <div className={styles.divider}>
-          <span>Or</span>
+          <span>или</span>
         </div>
 
-        <button
-          className={styles.googleButton}
-          type="button"
-          disabled={loading}
-          onClick={() => setStatus("Вход через Google пока не подключен.")}
-        >
-          <span className={styles.googleIcon}>
-            <GoogleIcon />
-          </span>
-          Войти с аккаунтом Google
-        </button>
+        {GOOGLE_CLIENT_ID ? (
+          <div
+            className={styles.googleButtonMount}
+            ref={googleButtonRef}
+            aria-busy={!googleReady}
+          />
+        ) : null}
+
+        {!GOOGLE_CLIENT_ID || googleError ? (
+          <button
+            className={styles.googleButton}
+            type="button"
+            disabled
+            title={googleError ?? "Google авторизация недоступна."}
+          >
+            <span className={styles.googleIcon}>
+              <GoogleIcon />
+            </span>
+            Google недоступен
+          </button>
+        ) : null}
       </form>
 
       <div className={styles.footerNote}>
