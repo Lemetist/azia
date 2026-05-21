@@ -245,6 +245,103 @@
   margin-top: 18px;
 }
 
+.exerciseBlock {
+  margin-top: 22px;
+}
+
+.exerciseBlock .panelHead h3 {
+  font-size: 20px;
+}
+
+.exerciseList {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.exerciseCard {
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(5, 7, 10, 0.42);
+}
+
+.exerciseImage {
+  width: 104px;
+  min-height: 146px;
+  height: 100%;
+  border-radius: 14px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.exerciseCopy {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.exerciseCopy h4,
+.exerciseCopy p {
+  margin: 0;
+}
+
+.exerciseCopy h4 {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.exerciseCopy strong {
+  color: #ffd7a2;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.exerciseCopy p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.exerciseTags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.exerciseTags span {
+  max-width: 100%;
+  min-height: 25px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(141, 162, 255, 0.14);
+  color: #c9d3ff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.exerciseCopy a {
+  width: fit-content;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(241, 141, 52, 0.28);
+  background: rgba(241, 141, 52, 0.12);
+  color: #ffd7a2;
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
 .workoutCard,
 .workoutActive {
   width: 100%;
@@ -864,5 +961,15 @@
   .workoutCard em,
   .workoutActive em {
     grid-column: 2;
+  }
+
+  .exerciseCard {
+    grid-template-columns: 1fr;
+  }
+
+  .exerciseImage {
+    width: 100%;
+    min-height: 168px;
+    max-height: 220px;
   }
 }
