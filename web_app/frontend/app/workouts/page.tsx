@@ -18,6 +18,25 @@ type WorkoutPhase = {
   width: string;
 };
 
+type ExerciseAttributeName =
+  | "TYPE"
+  | "PRIMARY_MUSCLE"
+  | "SECONDARY_MUSCLE"
+  | "EQUIPMENT"
+  | "MECHANICS_TYPE";
+
+type WorkoutExercise = {
+  slug: string;
+  slug_en: string | null;
+  name: string;
+  name_en: string;
+  video_url: string;
+  image_url: string;
+  prescription: string;
+  coaching_note: string;
+  attributes: Array<{ name: ExerciseAttributeName; value: string }>;
+};
+
 type WorkoutItem = {
   slug: string;
   title: string;
@@ -32,6 +51,7 @@ type WorkoutItem = {
   hero_eyebrow: string;
   hero_lead: string;
   phases: WorkoutPhase[];
+  exercises: WorkoutExercise[];
   days: string[];
   completed_count: number;
   last_completed_at: string | null;
@@ -96,6 +116,7 @@ const fallbackWorkouts: WorkoutItem[] = [
       { label: "Сила", value: "28 мин", tone: "indigo", width: "82%" },
       { label: "Мобилити", value: "12 мин", tone: "coral", width: "42%" },
     ],
+    exercises: [],
     days: ["mon", "wed"],
     completed_count: 0,
     last_completed_at: null,
@@ -118,6 +139,7 @@ const fallbackWorkouts: WorkoutItem[] = [
       { label: "Интервалы", value: "22 мин", tone: "indigo", width: "78%" },
       { label: "Заминка", value: "8 мин", tone: "coral", width: "30%" },
     ],
+    exercises: [],
     days: ["tue", "thu"],
     completed_count: 0,
     last_completed_at: null,
@@ -140,6 +162,7 @@ const fallbackWorkouts: WorkoutItem[] = [
       { label: "Мобилити", value: "14 мин", tone: "coral", width: "66%" },
       { label: "Сброс", value: "4 мин", tone: "indigo", width: "18%" },
     ],
+    exercises: [],
     days: ["wed", "thu"],
     completed_count: 0,
     last_completed_at: null,
@@ -186,6 +209,33 @@ function formatWorkoutCategory(category: WorkoutCategory) {
   }
 
   return "Силовая";
+}
+
+const exerciseAttributeLabels: Partial<Record<string, string>> = {
+  BAR: "Гриф",
+  BARBELL: "Штанга",
+  BENCH: "Скамья",
+  CABLE: "Кроссовер",
+  CARDIO: "Кардио",
+  COMPOUND: "База",
+  CROSSFIT: "Кроссфит",
+  FOREARMS: "Предплечья",
+  FULL_BODY: "Все тело",
+  GLUTES: "Ягодицы",
+  HAMSTRINGS: "Бицепс бедра",
+  ISOLATION: "Изоляция",
+  PLYOMETRICS: "Плиометрика",
+  QUADRICEPS: "Квадрицепсы",
+  ROPE: "Канат",
+  SHOULDERS: "Плечи",
+  STRENGTH: "Сила",
+};
+
+function getExerciseTags(exercise: WorkoutExercise) {
+  return exercise.attributes
+    .filter((attribute) => attribute.name !== "SECONDARY_MUSCLE")
+    .slice(0, 4)
+    .map((attribute) => exerciseAttributeLabels[attribute.value] ?? attribute.value.replaceAll("_", " "));
 }
 
 function getPhaseMinutes(phase: WorkoutPhase) {
@@ -1028,6 +1078,44 @@ export default function WorkoutsPage() {
                 </div>
               ))}
             </div>
+
+            {selectedWorkout.exercises.length ? (
+              <section className={styles.exerciseBlock}>
+                <div className={styles.panelHead}>
+                  <div>
+                    <p className={styles.kicker}>Упражнения</p>
+                    <h3>Модели движения</h3>
+                  </div>
+                  <span>{selectedWorkout.exercises.length}</span>
+                </div>
+
+                <div className={styles.exerciseList}>
+                  {selectedWorkout.exercises.map((exercise) => (
+                    <article className={styles.exerciseCard} key={exercise.slug}>
+                      <img
+                        alt=""
+                        className={styles.exerciseImage}
+                        loading="lazy"
+                        src={exercise.image_url}
+                      />
+                      <div className={styles.exerciseCopy}>
+                        <h4>{exercise.name_en || exercise.name}</h4>
+                        <strong>{exercise.prescription}</strong>
+                        <p>{exercise.coaching_note}</p>
+                        <div className={styles.exerciseTags}>
+                          {getExerciseTags(exercise).map((tag) => (
+                            <span key={`${exercise.slug}-${tag}`}>{tag}</span>
+                          ))}
+                        </div>
+                        <a href={exercise.video_url} rel="noreferrer" target="_blank">
+                          Техника
+                        </a>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            ) : null}
 
             <div className={styles.coachCue}>
               <span>Подсказка тренера</span>

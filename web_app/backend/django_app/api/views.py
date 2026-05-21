@@ -66,7 +66,7 @@ from .serializers import (
     TokenRefreshResponseSerializer,
     UserSerializer,
 )
-from .models import ScheduleBooking, ScheduleSlot, Workout, WorkoutPhase
+from .models import ScheduleBooking, ScheduleSlot, Workout, WorkoutExercise, WorkoutPhase
 
 
 @extend_schema(
@@ -272,6 +272,14 @@ def _build_workout_catalog(user):
     workouts = (
         Workout.objects.prefetch_related(
             Prefetch("phases", queryset=WorkoutPhase.objects.order_by("position"))
+        )
+        .prefetch_related(
+            Prefetch(
+                "exercise_links",
+                queryset=WorkoutExercise.objects.select_related("exercise")
+                .prefetch_related("exercise__attributes")
+                .order_by("position"),
+            )
         )
         .prefetch_related("schedule_slots")
         .annotate(

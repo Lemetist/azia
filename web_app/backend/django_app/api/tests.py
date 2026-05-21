@@ -431,7 +431,7 @@ class AuthApiTests(APITestCase):
         self.assertFalse(second_response.data["created"])
         self.assertEqual(ScheduleBooking.objects.filter(user=self.user, slot_id=slot_id).count(), 1)
 
-    def test_workouts_returns_catalog_with_phases_and_days(self):
+    def test_workouts_returns_catalog_with_phases_exercises_and_days(self):
         self.client.force_authenticate(user=self.user)
 
         response = self.client.get("/api/workouts/")
@@ -443,6 +443,15 @@ class AuthApiTests(APITestCase):
         self.assertGreaterEqual(len(response.data["workouts"][0]["phases"]), 1)
         self.assertIn("completed_count", response.data["workouts"][0])
         self.assertIn("last_completed_at", response.data["workouts"][0])
+
+        workout_with_exercises = next(
+            workout for workout in response.data["workouts"] if workout["exercises"]
+        )
+        exercise = workout_with_exercises["exercises"][0]
+        self.assertIn("slug", exercise)
+        self.assertIn("prescription", exercise)
+        self.assertIn("attributes", exercise)
+        self.assertGreaterEqual(len(exercise["attributes"]), 1)
 
     def test_complete_workout_creates_session_and_returns_repeat_count(self):
         self.client.force_authenticate(user=self.user)

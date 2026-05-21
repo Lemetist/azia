@@ -278,6 +278,83 @@ class Workout(models.Model):
         return self.title
 
 
+class Exercise(models.Model):
+    source_id = models.CharField(max_length=80, unique=True)
+    name = models.CharField(max_length=160)
+    name_en = models.CharField(max_length=160, blank=True)
+    slug = models.SlugField(unique=True)
+    slug_en = models.SlugField(blank=True, null=True, unique=True)
+    description = models.TextField(blank=True)
+    description_en = models.TextField(blank=True)
+    introduction = models.TextField(blank=True)
+    introduction_en = models.TextField(blank=True)
+    video_url = models.URLField(blank=True, max_length=500)
+    image_url = models.URLField(blank=True, max_length=500)
+
+    class Meta:
+        ordering = ["name_en", "name"]
+
+    def __str__(self) -> str:
+        return self.name_en or self.name
+
+
+class ExerciseAttribute(models.Model):
+    class Name(models.TextChoices):
+        TYPE = "TYPE", "Type"
+        PRIMARY_MUSCLE = "PRIMARY_MUSCLE", "Primary muscle"
+        SECONDARY_MUSCLE = "SECONDARY_MUSCLE", "Secondary muscle"
+        EQUIPMENT = "EQUIPMENT", "Equipment"
+        MECHANICS_TYPE = "MECHANICS_TYPE", "Mechanics type"
+
+    exercise = models.ForeignKey(
+        Exercise,
+        on_delete=models.CASCADE,
+        related_name="attributes",
+    )
+    name = models.CharField(max_length=32, choices=Name.choices)
+    value = models.CharField(max_length=64)
+
+    class Meta:
+        ordering = ["name", "value", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["exercise", "name", "value"],
+                name="api_unique_exercise_attribute",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.exercise}: {self.name}={self.value}"
+
+
+class WorkoutExercise(models.Model):
+    workout = models.ForeignKey(
+        Workout,
+        on_delete=models.CASCADE,
+        related_name="exercise_links",
+    )
+    exercise = models.ForeignKey(
+        Exercise,
+        on_delete=models.CASCADE,
+        related_name="workout_links",
+    )
+    prescription = models.CharField(max_length=120)
+    coaching_note = models.CharField(max_length=255, blank=True)
+    position = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["position", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["workout", "exercise"],
+                name="api_unique_workout_exercise",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.workout}: {self.exercise}"
+
+
 class WorkoutSession(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

@@ -9,10 +9,12 @@ from urllib.request import urlopen
 
 from .models import (
     Coach,
+    ExerciseAttribute,
     ScheduleBooking,
     ScheduleSlot,
     UserProfile,
     Workout,
+    WorkoutExercise,
     WorkoutPhase,
     WorkoutSession,
 )
@@ -284,8 +286,39 @@ class WorkoutPhaseSerializer(serializers.ModelSerializer):
         fields = ["label", "value", "tone", "width"]
 
 
+class ExerciseAttributeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExerciseAttribute
+        fields = ["name", "value"]
+
+
+class WorkoutExerciseSerializer(serializers.ModelSerializer):
+    slug = serializers.CharField(source="exercise.slug")
+    slug_en = serializers.CharField(source="exercise.slug_en")
+    name = serializers.CharField(source="exercise.name")
+    name_en = serializers.CharField(source="exercise.name_en")
+    video_url = serializers.URLField(source="exercise.video_url")
+    image_url = serializers.URLField(source="exercise.image_url")
+    attributes = ExerciseAttributeSerializer(source="exercise.attributes", many=True, read_only=True)
+
+    class Meta:
+        model = WorkoutExercise
+        fields = [
+            "slug",
+            "slug_en",
+            "name",
+            "name_en",
+            "video_url",
+            "image_url",
+            "prescription",
+            "coaching_note",
+            "attributes",
+        ]
+
+
 class WorkoutSerializer(serializers.ModelSerializer):
     phases = WorkoutPhaseSerializer(many=True, read_only=True)
+    exercises = WorkoutExerciseSerializer(source="exercise_links", many=True, read_only=True)
     days = serializers.SerializerMethodField()
     completed_count = serializers.SerializerMethodField()
     last_completed_at = serializers.SerializerMethodField()
@@ -307,6 +340,7 @@ class WorkoutSerializer(serializers.ModelSerializer):
             "hero_lead",
             "days",
             "phases",
+            "exercises",
             "completed_count",
             "last_completed_at",
         ]
